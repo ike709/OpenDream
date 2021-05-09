@@ -1,44 +1,63 @@
-﻿using OpenDreamShared.Compiler;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Text.RegularExpressions;
 
-namespace DMCompiler.Preprocessor {
+namespace OpenDreamShared.Compiler.DMPreprocessor {
     class DMPreprocessor {
+        public List<string> IncludedMaps = new();
+        public string IncludedInterface;
+
         //Every include pushes a new lexer that gets popped once the included file is finished
         private Stack<DMPreprocessorLexer> _lexerStack =  new();
 
         Stack<Token> _unprocessedTokens = new();
-        private StringBuilder _result = new StringBuilder();
-        private StringBuilder _currentLine = new StringBuilder();
+        private List<Token> _result = new();
+        private List<Token> _currentLine = new();
         private bool _isCurrentLineWhitespaceOnly = true;
         private Dictionary<string, DMMacro> _defines = new();
+        private bool _enableDirectives;
 
-        public void IncludeFile(string includePath, string fileName) {
-            string source = File.ReadAllText(Path.Combine(includePath, fileName));
+        public DMPreprocessor(bool enableDirectives) {
+            _enableDirectives = enableDirectives;
+        }
+
+        public void IncludeFile(string includePath, string file) {
+            string source = File.ReadAllText(Path.Combine(includePath, file));
             source = source.Replace("\r\n", "\n");
-            source = Regex.Replace(source, @"\\\n", String.Empty); //Combine all lines ending with a backslash
             source += '\n';
 
-            _lexerStack.Push(new DMPreprocessorLexer(source));
+            _lexerStack.Push(new DMPreprocessorLexer(file, source));
 
             Token token = GetNextToken();
             while (token.Type != TokenType.EndOfFile) {
                 switch (token.Type) {
                     case TokenType.DM_Preproc_Include: {
+                        if (!_enableDirectives) throw new Exception("Cannot use preprocessor directives here");
+
                         Token includedFileToken = GetNextToken(true);
                         if (includedFileToken.Type != TokenType.DM_Preproc_ConstantString) throw new Exception("\"" + includedFileToken.Text + "\" is not a valid include path");
                         
                         string includedFile = (string)includedFileToken.Value;
-                        string includedFileName = Path.GetFileName(includedFile);
-                        string newIncludePath = Path.Combine(includePath, Path.GetDirectoryName(includedFile));
+                        string includedFileExtension = Path.GetExtension(includedFile);
+                        string fullIncludePath = Path.Combine(Path.GetDirectoryName(file), includedFile);
 
-                        if (includedFileName.EndsWith(".dm")) IncludeFile(newIncludePath, includedFileName);
+                        if (includedFileExtension == ".dm") {
+                            IncludeFile(includePath, fullIncludePath);
+                        } else if (includedFileExtension == ".dmm") {
+                            IncludedMaps.Add(fullIncludePath);
+                        } else if (includedFileExtension == ".dmf") {
+                            if (IncludedInterface != null) {
+                                throw new Exception("Attempted to include a second interface file (" + fullIncludePath + ") while one was already included (" + IncludedInterface + ")");
+                            }
+
+                            IncludedInterface = fullIncludePath;
+                        }
                         break;
                     }
                     case TokenType.DM_Preproc_Define: {
+                        if (!_enableDirectives) throw new Exception("Cannot use preprocessor directives here");
+
                         Token defineIdentifier = GetNextToken(true);
                         if (defineIdentifier.Type != TokenType.DM_Preproc_Identifier) throw new Exception("Invalid define identifier");
                         List<string> parameters = null;
@@ -86,6 +105,8 @@ namespace DMCompiler.Preprocessor {
                         break;
                     }
                     case TokenType.DM_Preproc_Undefine: {
+                        if (!_enableDirectives) throw new Exception("Cannot use preprocessor directives here");
+
                         Token defineIdentifier = GetNextToken(true);
                         if (defineIdentifier.Type != TokenType.DM_Preproc_Identifier) throw new Exception("Invalid define identifier");
 
@@ -100,7 +121,7 @@ namespace DMCompiler.Preprocessor {
                                 parameters = GetMacroParameters();
 
                                 if (parameters == null) {
-                                    _currentLine.Append(token.Text);
+                                    _currentLine.Add(token);
 
                                     break;
                                 }
@@ -113,17 +134,21 @@ namespace DMCompiler.Preprocessor {
                             expandedTokens.Reverse();
 
                             foreach (Token expandedToken in expandedTokens) {
-                                _unprocessedTokens.Push(expandedToken);
+                                Token newToken = new Token(expandedToken.Type, expandedToken.Text, token.SourceFile, token.Line, token.Column, expandedToken.Value);
+                                
+                                _unprocessedTokens.Push(newToken);
                             }
                         } else {
                             _isCurrentLineWhitespaceOnly = false;
 
-                            _currentLine.Append(token.Text);
+                            _currentLine.Add(token);
                         }
 
                         break;
                     }
                     case TokenType.DM_Preproc_Ifdef: {
+                        if (!_enableDirectives) throw new Exception("Cannot use preprocessor directives here");
+
                         Token define = GetNextToken(true);
                         if (define.Type != TokenType.DM_Preproc_Identifier) throw new Exception("Expected a define identifier");
 
@@ -134,6 +159,8 @@ namespace DMCompiler.Preprocessor {
                         break;
                     }
                     case TokenType.DM_Preproc_Ifndef: {
+                        if (!_enableDirectives) throw new Exception("Cannot use preprocessor directives here");
+
                         Token define = GetNextToken(true);
                         if (define.Type != TokenType.DM_Preproc_Identifier) throw new Exception("Expected a define identifier");
 
@@ -144,22 +171,23 @@ namespace DMCompiler.Preprocessor {
                         break;
                     }
                     case TokenType.DM_Preproc_Else: { //If this is encountered outside of SkipIfBody, it needs skipped
-                        SkipIfBody();
+                        if (!_enableDirectives) throw new Exception("Cannot use preprocessor directives here");
 
+                        SkipIfBody();
                         break;
                     }
+                    case TokenType.DM_Preproc_EndIf: break;
                     case TokenType.Newline: {
                         if (!_isCurrentLineWhitespaceOnly) {
-                            _result.Append(_currentLine);
-                            _result.Append('\n');
+                            _result.AddRange(_currentLine);
+                            _result.Add(token);
 
                             _isCurrentLineWhitespaceOnly = true;
                         }
 
-                        _currentLine = new StringBuilder();
+                        _currentLine.Clear();
                         break;
                     }
-                    case TokenType.DM_Preproc_EndIf: break;
                     case TokenType.DM_Preproc_Number:
                     case TokenType.DM_Preproc_String:
                     case TokenType.DM_Preproc_ConstantString:
@@ -169,9 +197,9 @@ namespace DMCompiler.Preprocessor {
                     case TokenType.DM_Preproc_Punctuator_LeftParenthesis:
                     case TokenType.DM_Preproc_Punctuator_LeftBracket:
                     case TokenType.DM_Preproc_Punctuator_RightBracket:
-                    case TokenType.DM_Preproc_Punctuator_RightParenthesis: _isCurrentLineWhitespaceOnly = false; _currentLine.Append(token.Text); break;
-                    case TokenType.DM_Preproc_Whitespace: _currentLine.Append(token.Text);  break;
-                    default: throw new Exception("Invalid token '" + token.Text + "'");
+                    case TokenType.DM_Preproc_Punctuator_RightParenthesis: _isCurrentLineWhitespaceOnly = false; _currentLine.Add(token); break;
+                    case TokenType.DM_Preproc_Whitespace: _currentLine.Add(token); break;
+                    default: throw new Exception("Invalid token " + token);
                 }
 
                 token = GetNextToken();
@@ -180,8 +208,8 @@ namespace DMCompiler.Preprocessor {
             _lexerStack.Pop();
         }
 
-        public string GetResult() {
-            return _result.ToString();
+        public List<Token> GetResult() {
+            return _result;
         }
 
         private Token GetNextToken(bool ignoreWhitespace = false) {

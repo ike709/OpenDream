@@ -1,10 +1,8 @@
 ﻿using OpenDreamShared.Interface;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace OpenDreamShared.Compiler.DMF {
-    class DMFParser : Parser {
+    class DMFParser : Parser<char> {
         private TokenType[] _sharedElementAttributeTypes = new TokenType[] {
             TokenType.DMF_Pos,
             TokenType.DMF_Size,
@@ -93,11 +91,11 @@ namespace OpenDreamShared.Compiler.DMF {
                     case TokenType.DMF_Input: return ElementInput(elementName);
                     case TokenType.DMF_Button: return ElementButton(elementName);
                     case TokenType.DMF_Browser: return ElementBrowser(elementName);
-                    default: throw new Exception("Invalid element type '" + elementType.Text + "'");
+                    default: Error("Invalid element type '" + elementType.Text + "'"); break;
                 }
-            } else {
-                return null;
             }
+
+            return null;
         }
 
         public ElementDescriptorMain ElementMain(string elementName) {
@@ -464,7 +462,7 @@ namespace OpenDreamShared.Compiler.DMF {
                 case TokenType.DMF_TextColor: Color(); break;
                 case TokenType.DMF_IsDisabled: Boolean(); break;
                 case TokenType.DMF_RightClick: Boolean(); break;
-                default: throw new Exception("Invalid attribute '" + attributeToken.Text + "'");
+                default: Error("Invalid attribute '" + attributeToken.Text + "'"); break;
             }
         }
     }

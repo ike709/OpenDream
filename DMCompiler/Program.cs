@@ -1,69 +1,105 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text.Json;
 using DMCompiler.DM;
 using DMCompiler.DM.Visitors;
-using DMCompiler.Preprocessor;
+using OpenDreamShared.Compiler;
 using OpenDreamShared.Compiler.DM;
-using OpenDreamShared.Dream;
+using OpenDreamShared.Compiler.DMPreprocessor;
 using OpenDreamShared.Json;
 
 namespace DMCompiler {
     class Program {
-        public static List<string> StringTable = new();
-        public static Dictionary<string, int> StringToStringID = new();
-        public static List<DMASTProcStatement> GlobalInitProcStatements = new();
+        public static List<string> IncludedMaps = new();
+        public static string IncludedInterface = null;
 
         static void Main(string[] args) {
-            if (args.Length < 2) {
-                Console.WriteLine("Three arguments are required:");
-                Console.WriteLine("\tInclude Path");
-                Console.WriteLine("\t\tPath to the folder containing the code");
-                Console.WriteLine("\tDME File");
-                Console.WriteLine("\t\tPath to the DME file to be compiled");
-                Console.WriteLine("\tOutput File");
-                Console.WriteLine("\t\tPath to the output file");
+            if (!VerifyArguments(args)) return;
 
-                return;
+            DMPreprocessor preprocessor = Preprocess(args);
+            if (Compile(preprocessor.GetResult())) {
+                //Output file is the first file with the extension changed to .json
+                string outputFile = Path.ChangeExtension(args[0], "json");
+
+                SaveJson(preprocessor.IncludedMaps, preprocessor.IncludedInterface, outputFile);
+            }
+        }
+
+        private static bool VerifyArguments(string[] args) {
+            if (args.Length < 1) {
+                Console.WriteLine("At least one DME or DM file must be provided as an argument");
+
+                return false;
             }
 
-            DMPreprocessor preprocessor = new DMPreprocessor();
-            preprocessor.IncludeFile("DMStandard", "_Standard.dm");
-            preprocessor.IncludeFile(args[0], args[1]);
+            foreach (string arg in args) {
+                string extension = Path.GetExtension(arg);
 
-            string source = preprocessor.GetResult();
-            DMLexer dmLexer = new DMLexer(source);
+                if (extension != ".dme" && extension != ".dm") {
+                    Console.WriteLine(arg + " is not a valid DME or DM file");
+
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static DMPreprocessor Preprocess(string[] files) {
+            DMPreprocessor preprocessor = new DMPreprocessor(true);
+
+            string compilerDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string dmStandardDirectory = Path.Combine(compilerDirectory, "DMStandard");
+            preprocessor.IncludeFile(dmStandardDirectory, "_Standard.dm");
+
+            foreach (string file in files) {
+                string directoryPath = Path.GetDirectoryName(file);
+                string fileName = Path.GetFileName(file);
+
+                preprocessor.IncludeFile(directoryPath, fileName);
+            }
+
+            return preprocessor;
+        }
+
+        private static bool Compile(List<Token> preprocessedTokens) {
+            DMLexer dmLexer = new DMLexer(null, preprocessedTokens);
             DMParser dmParser = new DMParser(dmLexer);
             DMASTFile astFile = dmParser.File();
-            
+
+            if (dmParser.Errors.Count > 0) {
+                foreach (CompilerError error in dmParser.Errors) {
+                    Console.WriteLine(error);
+                }
+
+                return false;
+            }
+
             DMASTSimplifier astSimplifier = new DMASTSimplifier();
             astSimplifier.SimplifyAST(astFile);
 
             DMVisitorObjectBuilder dmObjectBuilder = new DMVisitorObjectBuilder();
             dmObjectBuilder.BuildObjectTree(astFile);
 
+            return true;
+        }
+
+        private static void SaveJson(List<string> maps, string interfaceFile, string outputFile) {
             DreamCompiledJson compiledDream = new DreamCompiledJson();
-            compiledDream.Strings = StringTable;
+            compiledDream.Strings = DMObjectTree.StringTable;
+            compiledDream.Maps = maps;
+            compiledDream.Interface = interfaceFile;
             compiledDream.RootObject = DMObjectTree.CreateJsonRepresentation();
-            if (GlobalInitProcStatements.Count > 0) compiledDream.GlobalInitProc = CreateGlobalInitProc().GetJsonRepresentation();
+            if (DMObjectTree.GlobalInitProc != null) compiledDream.GlobalInitProc = DMObjectTree.GlobalInitProc.GetJsonRepresentation();
 
             string json = JsonSerializer.Serialize(compiledDream, new JsonSerializerOptions() {
                 IgnoreNullValues = true
             });
-            
-            File.WriteAllText(args[2], json);
-        }
 
-        private static DMProc CreateGlobalInitProc() {
-            DMProc globalInitProc = new DMProc(null);
-            DMVisitorProcBuilder globalInitProcBuilder = new DMVisitorProcBuilder(DMObjectTree.GetDMObject(DreamPath.Root), globalInitProc);
-
-            foreach (DMASTProcStatement statement in GlobalInitProcStatements) {
-                statement.Visit(globalInitProcBuilder);
-            }
-
-            return globalInitProc;
+            File.WriteAllText(outputFile, json);
+            Console.WriteLine("Saved to " + outputFile);
         }
     }
 }

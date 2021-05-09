@@ -13,4 +13,8 @@
 /DMCompiler/obj
 /DMCompiler/Properties
 /packages/System.Net.Sockets.4.3.0
-/TestGame/ObjectTree.json
+/TestGame/environment.json
+
+# JetBrains Rider
+.idea/
+*.sln.iml

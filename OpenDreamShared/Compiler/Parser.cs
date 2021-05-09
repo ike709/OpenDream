@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 
 namespace OpenDreamShared.Compiler {
-    class Parser {
-        private Lexer _lexer;
+    class Parser<SourceType> {
+        public List<CompilerError> Errors = new();
+
+        private Lexer<SourceType> _lexer;
         private Token _currentToken;
         private Stack<Token> _tokenStack = new Stack<Token>();
 
-        public Parser(Lexer lexer) {
+        public Parser(Lexer<SourceType> lexer) {
             _lexer = lexer;
 
             Advance();
@@ -22,6 +24,10 @@ namespace OpenDreamShared.Compiler {
                 _currentToken = _tokenStack.Pop();
             } else {
                 _currentToken = _lexer.GetNextToken();
+
+                if (_currentToken.Type == TokenType.Error) {
+                    Error((string)_currentToken.Value);
+                }
             }
 
             return Current();
@@ -57,7 +63,7 @@ namespace OpenDreamShared.Compiler {
 
         protected void Consume(TokenType type, string errorMessage) {
             if (!Check(type)) {
-                throw new Exception(errorMessage);
+                Error(errorMessage);
             }
         }
 
@@ -65,8 +71,12 @@ namespace OpenDreamShared.Compiler {
             foreach (TokenType type in types) {
                 if (Check(type)) return;
             }
-            
-            throw new Exception(errorMessage);
+
+            Error(errorMessage);
+        }
+
+        protected void Error(string message) {
+            Errors.Add(new CompilerError(_currentToken, message));
         }
     }
 }
