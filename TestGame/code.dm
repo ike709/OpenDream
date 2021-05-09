@@ -20,7 +20,7 @@
 		var/list/viewers = viewers()
 
 		for (var/mob/viewer in viewers)
-			viewer << "[ckey] says: \"[message]\""
+			viewer << "[ckey] says: \"[message]\"
 
 	verb/move_up()
 		step(src, UP)
