@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
 
@@ -21,4 +21,4 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore /m
     - name: Compile TestGame
-      run: dotnet D:\a\OpenDream\OpenDream\DMCompiler\bin\Release\net5.0\DMCompiler.exe D:\a\OpenDream\OpenDream\TestGame
+      run: DMCompiler\bin\Release\net5.0\DMCompiler.exe TestGame
