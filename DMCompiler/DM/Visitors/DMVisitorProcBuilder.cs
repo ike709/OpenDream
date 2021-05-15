@@ -362,7 +362,7 @@ namespace DMCompiler.DM.Visitors {
                 } else {
                     _currentVariable =  _dmObject.GetVariable(identifier.Identifier);
                     if (_currentVariable == null) _currentVariable =  _dmObject.GetGlobalVariable(identifier.Identifier);
-                    if (_currentVariable == null) throw new Exception("Invalid identifier \"" + identifier.Identifier + "\"");
+                    if (_currentVariable == null) ErrorList.Errors.AddError("Invalid identifier \"" + identifier.Identifier + "\"");
 
                     _proc.GetIdentifier(identifier.Identifier);
                 }
@@ -371,7 +371,7 @@ namespace DMCompiler.DM.Visitors {
 
         public void VisitCallableProcIdentifier(DMASTCallableProcIdentifier procIdentifier) {
             if (!_dmObject.HasProc(procIdentifier.Identifier)) {
-                throw new Exception("Type " + _dmObject.Path + " does not have a proc named \"" + procIdentifier.Identifier + "\"");
+                ErrorList.Errors.AddError("Type " + _dmObject.Path + " does not have a proc named \"" + procIdentifier.Identifier + "\"");
             }
 
             _proc.GetProc(procIdentifier.Identifier);
@@ -430,13 +430,14 @@ namespace DMCompiler.DM.Visitors {
             DMASTDereference.Dereference deref = dereferenceProc.Dereferences[^1];
             if (deref.Type == DMASTDereference.DereferenceType.Direct) {
                 if (_currentVariable.Type == null) {
-                    throw new Exception("Cannot dereference property \"" + deref.Property + "\" because \"" + _currentVariable.Name + "\" does not have a type");
+                    ErrorList.Errors.AddError("Cannot dereference property \"" + deref.Property + "\" because \"" + _currentVariable.Name + "\" does not have a type");
+                    return;
                 }
-
+                
                 DreamPath type = _currentVariable.Type.Value;
                 DMObject dmObject = DMObjectTree.GetDMObject(type, false);
 
-                if (!dmObject.HasProc(deref.Property)) throw new Exception("Type + " + type + " does not have a proc named \"" + deref.Property + "\"");
+                if (!dmObject.HasProc(deref.Property)) ErrorList.Errors.AddError("Type + " + type + " does not have a proc named \"" + deref.Property + "\"");
                 _proc.DereferenceProc(deref.Property);
             } else if (deref.Type == DMASTDereference.DereferenceType.Search) { //No compile-time checks
                 _proc.DereferenceProc(deref.Property);
@@ -874,7 +875,7 @@ namespace DMCompiler.DM.Visitors {
 
                     _currentVariable = dmObject.GetVariable(deref.Property);
                     if (_currentVariable == null) _currentVariable = dmObject.GetGlobalVariable(deref.Property);
-                    if (_currentVariable == null) throw new Exception("Invalid property \"" + deref.Property + "\" on type " + dmObject.Path);
+                    if (_currentVariable == null) ErrorList.Errors.AddError("Invalid property \"" + deref.Property + "\" on type " + dmObject.Path);
 
                     _proc.Dereference(deref.Property);
                 } else if (deref.Type == DMASTDereference.DereferenceType.Search) { //No compile-time checks

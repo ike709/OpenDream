@@ -225,6 +225,10 @@ proc/jointext(list/List, Glue, Start = 1, End = 0)
 	
 	return List.Join(Glue, Start, End)
 
+proc/hearers(Depth = world.view, Center = usr)
+	//TODO: Actual cursed hearers implementation
+	return viewers(Depth, Center)
+
 proc/lentext(T)
 	return length(T)
 

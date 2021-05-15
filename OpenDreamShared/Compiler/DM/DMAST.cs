@@ -16,8 +16,8 @@ namespace OpenDreamShared.Compiler.DM {
         public void VisitProcStatementReturn(DMASTProcStatementReturn statementReturn) { throw new NotImplementedException(); }
         public void VisitProcStatementBreak(DMASTProcStatementBreak statementBreak) { throw new NotImplementedException(); }
         public void VisitProcStatementContinue(DMASTProcStatementContinue statementContinue) { throw new NotImplementedException(); }
-        public void VisitProcStatementGoto(DMASTProcStatementGoto statementGoto) { throw new NotImplementedException(); }
-        public void VisitProcStatementLabel(DMASTProcStatementLabel statementLabel) { throw new NotImplementedException(); }
+        public void VisitProcStatementGoto(DMASTProcStatementGoto statementGoto) {  }
+        public void VisitProcStatementLabel(DMASTProcStatementLabel statementLabel) {  }
         public void VisitProcStatementDel(DMASTProcStatementDel statementDel) { throw new NotImplementedException(); }
         public void VisitProcStatementSet(DMASTProcStatementSet statementSet) { throw new NotImplementedException(); }
         public void VisitProcStatementSpawn(DMASTProcStatementSpawn statementSpawn) { throw new NotImplementedException(); }

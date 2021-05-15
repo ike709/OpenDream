@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using DMCompiler.DM;
 using DMCompiler.DM.Visitors;
+using Microsoft.VisualBasic;
 using OpenDreamShared.Compiler;
 using OpenDreamShared.Compiler.DM;
 using OpenDreamShared.Compiler.DMPreprocessor;
@@ -17,17 +21,30 @@ namespace DMCompiler {
 
         static void Main(string[] args) {
             if (!VerifyArguments(args)) return;
+            try
+            {
+                DMPreprocessor preprocessor = Preprocess(args);
+                if (Compile(preprocessor.GetResult()))
+                {
+                    //Output file is the first file with the extension changed to .json
 
-            DMPreprocessor preprocessor = Preprocess(args);
-            if (Compile(preprocessor.GetResult())) {
-                //Output file is the first file with the extension changed to .json
-                string outputFile = Path.ChangeExtension(args[0], "json");
-
-                SaveJson(preprocessor.IncludedMaps, preprocessor.IncludedInterface, outputFile);
-            } else {
-                //Compile errors, exit with an error code
-                Environment.Exit(1);
+                    //SaveJson(preprocessor.IncludedMaps, preprocessor.IncludedInterface, outputFile);
+                }
+                else
+                {
+                    //Compile errors, exit with an error code
+                    Environment.Exit(1);
+                }
             }
+            catch
+            {
+                string outputFile = Path.ChangeExtension(args[0], "json");
+                File.WriteAllText(outputFile, ErrorList.Errors.ReturnErrors());
+                Console.WriteLine("Saved to " + outputFile);
+            }
+            
+            
+            
         }
 
         private static bool VerifyArguments(string[] args) {
@@ -109,6 +126,34 @@ namespace DMCompiler {
 
             File.WriteAllText(outputFile, json);
             Console.WriteLine("Saved to " + outputFile);
+            
+            
         }
+    }
+    
+    class ErrorList
+    {
+        private static ErrorList _ErrorList = new ErrorList();
+        public static ErrorList Errors
+        {
+            get { return _ErrorList; }
+        }
+        private HashSet<string> errorList = new();
+        private ErrorList()
+        {
+
+        }
+
+        public void AddError(string err)
+        {
+            errorList.Add(err);
+        }
+
+        public string ReturnErrors()
+        {
+            StringBuilder output = new StringBuilder();
+            return output.AppendJoin("\n", errorList).ToString();
+        }
+
     }
 }

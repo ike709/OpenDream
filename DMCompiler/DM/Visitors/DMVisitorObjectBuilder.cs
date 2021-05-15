@@ -3,6 +3,7 @@ using OpenDreamShared.Compiler.DM;
 using OpenDreamShared.Dream;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DMCompiler.DM.Visitors {
     class DMVisitorObjectBuilder : DMASTVisitor {
@@ -15,9 +16,23 @@ namespace DMCompiler.DM.Visitors {
             _valueStack.Clear();
             astFile.Visit(this);
 
-            foreach (DMObject dmObject in DMObjectTree.AllObjects.Values) {
+            /*try
+            {
+                foreach (DMObject dmObject in DMObjectTree.AllObjects.Values)
+                {
+                    dmObject.CompileProcs();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorList.Errors.AddError(ex.Message);
+            }*/
+            
+            foreach (DMObject dmObject in DMObjectTree.AllObjects.Values.ToList())
+            {
                 dmObject.CompileProcs();
             }
+            
 
             DMObjectTree.CreateGlobalInitProc();
         }

@@ -31,7 +31,7 @@ namespace DMCompiler.DM {
             DMObject dmObject;
 
             if (!AllObjects.TryGetValue(path, out dmObject)) {
-                if (!createIfNonexistent) throw new Exception("Type " + path + " does not exist");
+                if (!createIfNonexistent) ErrorList.Errors.AddError("Type " + path + " does not exist");
 
                 DMObject parent = null;
                 if (path.Elements.Length > 0) {
