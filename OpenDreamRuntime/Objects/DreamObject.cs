@@ -28,8 +28,12 @@ namespace OpenDreamRuntime.Objects {
             var procState = InitProc(thread, null, creationArguments);
             thread.PushProcState(procState);
 
-            if (thread.Resume() == DreamValue.Null) {
-                throw new InvalidOperationException($"DreamObject.InitSpawn ({this.ObjectDefinition.Type}) called a yielding proc!");
+            if (thread.Resume() == DreamValue.Null)
+            {
+                var type = this.ObjectDefinition.Type;
+                //this.Delete();
+                thread.HandleException(new Exception($"DreamObject.InitSpawn ({type}) called a yielding proc!"));
+               // throw new Exception($"DreamObject.InitSpawn ({type}) called a yielding proc!");
             }
         }
 

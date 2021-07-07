@@ -24,11 +24,7 @@ namespace DMCompiler.DM.Expressions {
                 DMASTDereference.Dereference deref = dereferences[i];
 
                 switch (deref.Type) {
-                    case DMASTDereference.DereferenceType.Direct: {
-                        if (current_path == null) {
-                            throw new Exception("Cannot dereference property \"" + deref.Property + "\" because a type specifier is missing");
-                        }
-
+                    case DMASTDereference.DereferenceType.Direct when current_path != null: {
                         DMObject dmObject = DMObjectTree.GetDMObject(current_path.Value, false);
 
                         var current = dmObject.GetVariable(deref.Property);
@@ -40,6 +36,7 @@ namespace DMCompiler.DM.Expressions {
                         break;
                     }
 
+                    case DMASTDereference.DereferenceType.Direct:
                     case DMASTDereference.DereferenceType.Search: {
                         var current = new DMVariable(null, deref.Property, false);
                         current_path = current.Type;

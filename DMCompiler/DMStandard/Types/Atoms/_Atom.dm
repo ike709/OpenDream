@@ -30,6 +30,14 @@
 	var/luminosity = 0
 	var/opacity = 0
 	var/matrix/transform
+	var/blend_mode = 0
+	var/text = ""
+
+	var/maptext
+	var/maptext_width
+    var/maptext_height
+    var/maptext_x
+    var/maptext_y
 
 	var/gender = "neuter"
 	var/density = FALSE
@@ -52,5 +60,5 @@
 
 	proc/Exit(atom/movable/O, atom/newloc)
 		return TRUE
-	
+
 	proc/Stat()

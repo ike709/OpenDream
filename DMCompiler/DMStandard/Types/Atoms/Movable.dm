@@ -1,10 +1,12 @@
 ﻿/atom/movable
 	var/screen_loc
 
+	var/list/locs = list()
+
 	var/animate_movement = FORWARD_STEPS
 
 	proc/Bump(atom/Obstacle)
-	
+
 	proc/Move(atom/NewLoc, Dir=0)
 		if (isnull(NewLoc)) return
 
@@ -17,7 +19,7 @@
 			var/area/oldarea = oldloc.loc
 			var/area/newarea = NewLoc.loc
 			loc = NewLoc
-			
+
 			oldloc.Exited(src, loc)
 			loc.Entered(src, oldloc)
 			if (newarea != oldarea)

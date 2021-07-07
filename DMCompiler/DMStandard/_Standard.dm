@@ -13,6 +13,8 @@ proc/cmptext(T1)
 proc/copytext(T, Start = 1, End = 0)
 proc/cos(X)
 proc/CRASH(msg)
+proc/ASSERT(x) if(!x) CRASH(x)
+proc/walk_towards(x) return
 proc/fcopy(Src, Dst)
 proc/fcopy_rsc(File)
 proc/fdel(File)
@@ -36,9 +38,16 @@ proc/isnull(Val)
 proc/isnum(Val)
 proc/ispath(Val, Type)
 proc/istext(Val)
+proc/icon_states(Icon, mode=0) return
 proc/isturf(Loc1)
+proc/step_away(Ref,Trg,Max=5,Speed=0) return
+proc/step_rand(Ref, Speed=0) return
+proc/get_step_rand(Ref) return
+proc/get_step_to(Ref, Trg, Min=0) return
 proc/json_decode(JSON)
+proc/walk_away(Ref,Trg,Max=5,Lag=0,Speed=0) return
 proc/json_encode(Value)
+proc/ckeyEx(key) return ckey(key)
 proc/length(E)
 proc/list2params(List)
 proc/log(X, Y)
@@ -104,7 +113,7 @@ proc/winset(player, control_id, params)
 
 proc/block(var/atom/Start, var/atom/End)
 	var/list/atoms = list()
-	
+
 	var/startX = min(Start.x, End.x)
 	var/startY = min(Start.y, End.y)
 	var/startZ = min(Start.z, End.z)
@@ -115,7 +124,7 @@ proc/block(var/atom/Start, var/atom/End)
 		for (var/y=startY; y<=endY; y++)
 			for (var/x=startX; x<=endX; x++)
 				atoms.Add(locate(x, y, z))
-	
+
 	return atoms
 
 proc/range(Dist, atom/Center = usr)
@@ -147,7 +156,7 @@ proc/orange(Dist = 5, var/atom/Center = usr)
 
 proc/get_step(atom/Ref, Dir)
 	if (Ref == null) return null
-	
+
 	var/x = Ref.x
 	var/y = Ref.y
 	var/z = Ref.z
@@ -240,12 +249,15 @@ proc/hearers(Depth = world.view, Center = usr)
 	//TODO: Actual cursed hearers implementation
 	return viewers(Depth, Center)
 
+proc/ohearers(Depth=world.view,Center=usr)
+	oviewers(Depth, Center)
+
 proc/step_towards(atom/movable/Ref, /atom/Trg, Speed)
 	Ref.Move(get_step_towards(Ref, Trg), get_dir(Ref, Trg))
 
 proc/jointext(list/List, Glue, Start = 1, End = 0)
 	if (isnull(List)) CRASH("Invalid list")
-	
+
 	return List.Join(Glue, Start, End)
 
 proc/lentext(T)

@@ -9,6 +9,8 @@
 	var/x
 	var/y
 	var/z
+	var/status
+	var/priority = 0
 
 	proc/New(file, repeat=0, wait, channel, volume)
 		if (istype(file, /sound))

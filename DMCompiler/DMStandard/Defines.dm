@@ -1,6 +1,18 @@
 ﻿#define TRUE 1
 #define FALSE 0
 
+#define SOUND_MUTE 1
+#define SOUND_PAUSED 2
+#define SOUND_STREAM 3
+#define SOUND_UPDATE 4
+
+#define BLEND_DEFAULT 0
+#define BLEND_OVERLAY 1
+#define BLEND_ADD 2
+#define BLEND_SUBTRACT 3
+#define BLEND_MULTIPLY 4
+#define BLEND_INSET_OVERLAY 5
+
 #define NORTH 1
 #define SOUTH 2
 #define EAST 4

@@ -4,9 +4,11 @@
 	var/list/images = list()
 
 	var/atom/statobj
+	var/show_popup_menus = 1
 	var/statpanel
 
 	var/mob/mob
+	var/computer_id = 123
 	var/atom/eye
 	var/perspective = MOB_PERSPECTIVE
 	var/view
@@ -19,7 +21,7 @@
 	var/inactivity = 0
 	var/key
 	var/ckey
-	
+
 	var/timezone
 
 	proc/New(TopicData)
@@ -41,6 +43,9 @@
 	proc/Move(loc, dir)
 		mob.Move(loc, dir)
 
+	proc/IsByondMember()
+		return 0
+
 	proc/North()
 		Move(get_step(mob, NORTH), NORTH)
 
@@ -55,7 +60,7 @@
 
 	proc/Northeast()
 		Move(get_step(mob, NORTHEAST), NORTHEAST)
-	
+
 	proc/Southeast()
 		Move(get_step(mob, SOUTHEAST), SOUTHEAST)
 

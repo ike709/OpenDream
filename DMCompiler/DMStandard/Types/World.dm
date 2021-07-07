@@ -12,9 +12,11 @@
 	var/timeofday
 	var/realtime
 	var/tick_lag = 1
+	var/sleep_offline = 0
 	var/cpu = 0
 	var/fps = null
 	var/tick_usage
+	var/internet_address = null
 
 	var/maxx = 0
 	var/maxy = 0
@@ -27,7 +29,7 @@
 	var/url
 	var/status
 	var/list/params = null
-	
+
 	var/system_type
 
 	proc/New()
@@ -35,6 +37,6 @@
 
 	proc/Reboot()
 		CRASH("/world.Reboot() is not implemented")
-		
+
 	proc/Repop()
 		CRASH("/world.Repop() will not be implemented")
