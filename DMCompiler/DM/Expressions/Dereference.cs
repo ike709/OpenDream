@@ -40,8 +40,7 @@ namespace DMCompiler.DM.Expressions {
                         _fields.Add((deref.Conditional, deref.Property));
                         break;
                     }
-
-                    case DMASTDereference.DereferenceType.Direct:
+                    
                     case DMASTDereference.DereferenceType.Search: {
                         var current = new DMVariable(null, deref.Property, false);
                         current_path = current.Type;
