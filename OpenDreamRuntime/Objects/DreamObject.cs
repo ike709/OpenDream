@@ -31,9 +31,7 @@ namespace OpenDreamRuntime.Objects {
             if (thread.Resume() == DreamValue.Null)
             {
                 var type = this.ObjectDefinition.Type;
-                //this.Delete();
-                thread.HandleException(new Exception($"DreamObject.InitSpawn ({type}) called a yielding proc!"));
-               // throw new Exception($"DreamObject.InitSpawn ({type}) called a yielding proc!");
+                thread.HandleException(new InvalidOperationException($"DreamObject.InitSpawn ({type}) called a yielding proc!"));
             }
         }
 

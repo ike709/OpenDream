@@ -1,4 +1,4 @@
-﻿/var/world/world = null
+/var/world/world = null
 
 proc/abs(A)
 proc/alert(Usr = usr, Message, Title, Button1 = "Ok", Button2, Button3)
@@ -8,6 +8,7 @@ proc/arcsin(X)
 proc/arctan(A)
 proc/ascii2text(N)
 proc/ckey(Key)
+proc/ckeyEx(Text)
 proc/clamp(Value, Low, High)
 proc/cmptext(T1)
 proc/copytext(T, Start = 1, End = 0)
@@ -102,6 +103,7 @@ proc/winset(player, control_id, params)
 #include "Types\Matrix.dm"
 #include "Types\Mutable_Appearance.dm"
 #include "Types\Regex.dm"
+#include "Types\Savefile.dm"
 #include "Types\Sound.dm"
 #include "Types\World.dm"
 #include "Types\Atoms\_Atom.dm"
