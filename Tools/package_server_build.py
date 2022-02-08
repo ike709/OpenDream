@@ -158,7 +158,7 @@ def build_platform(platform: PlatformReg, skip_build: bool, hybrid_acz: bool) ->
         subprocess.run([
             "dotnet",
             "build",
-            p("Content.Server", "Content.Server.csproj"),
+            p("OpenDreamServer", "OpenDreamServer.csproj"),
             "-c", "Release",
             "--nologo",
             "/v:m",
@@ -259,7 +259,7 @@ def copy_dir_into_zip(directory, basepath, zipf, skip_folders={}):
 
 def copy_content_assemblies(target, zipf):
     files = []
-    source_dir = p("bin", "Content.Server")
+    source_dir = p("bin", "OpenDreamServer")
     base_assemblies = SERVER_CONTENT_ASSEMBLIES
 
     # Additional assemblies that need to be copied such as EFCore.

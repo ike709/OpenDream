@@ -89,7 +89,7 @@ def build(skip_build: bool) -> None:
         subprocess.run([
             "dotnet",
             "build",
-            p("Content.Client", "Content.Client.csproj"),
+            p("OpenDreamClient", "OpenDreamClient.csproj"),
             "-c", "Release",
             "--nologo",
             "/v:m",
@@ -167,7 +167,7 @@ def copy_dir_into_zip(directory, basepath, zipf):
 def copy_content_assemblies(target, zipf):
     files = []
 
-    source_dir = p("bin", "Content.Client")
+    source_dir = p("bin", "OpenDreamClient")
     base_assemblies = CLIENT_CONTENT_ASSEMBLIES
 
     # Include content assemblies.
