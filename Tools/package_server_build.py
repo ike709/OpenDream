@@ -259,7 +259,7 @@ def copy_dir_into_zip(directory, basepath, zipf, skip_folders={}):
 
 def copy_content_assemblies(target, zipf):
     files = []
-    source_dir = p("bin", "OpenDreamServer")
+    source_dir = p("bin", "Content.Server")
     base_assemblies = SERVER_CONTENT_ASSEMBLIES
 
     # Additional assemblies that need to be copied such as EFCore.
