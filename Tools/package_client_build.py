@@ -167,7 +167,7 @@ def copy_dir_into_zip(directory, basepath, zipf):
 def copy_content_assemblies(target, zipf):
     files = []
 
-    source_dir = p("bin", "OpenDreamClient")
+    source_dir = p("bin", "Content.Client")
     base_assemblies = CLIENT_CONTENT_ASSEMBLIES
 
     # Include content assemblies.
