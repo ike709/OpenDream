@@ -61,10 +61,9 @@ SERVER_IGNORED_RESOURCES = {
 # Assembly names to copy from content.
 # PDBs are included if available, .dll/.pdb appended automatically.
 SERVER_CONTENT_ASSEMBLIES = [
-    "Content.Server.Database",
-    "Content.Server",
-    "Content.Shared",
-    "Content.Shared.Database"
+    "OpenDreamServer",
+    "OpenDreamShared",
+    "OpenDreamRuntime"
 ]
 
 # Extra assemblies to copy on the server, with a startswith
