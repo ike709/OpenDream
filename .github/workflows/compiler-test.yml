@@ -27,7 +27,7 @@ jobs:
       shell: pwsh
       run: |
         cd main 
-        dotnet build OpenDreamShared --configuration Release --framework net6.0
+        dotnet build OpenDreamShared --configuration Release -p:TargetFramework=net6.0
         dotnet build DMCompiler --configuration Release 
     - name: Compile TestGame
       shell: pwsh
