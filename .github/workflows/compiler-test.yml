@@ -23,18 +23,16 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.100
-    - name: Install Dependencies
-      run: dotnet restore main/DMCompiler
     - name: Build
       shell: pwsh
-      run: cd main | dotnet build DMCompiler --configuration Release --no-restore /m
+      run: cd main | dotnet build DMCompiler --configuration Release /m
     - name: Compile TestGame
       shell: pwsh
-      run: cd DMCompiler | dotnet run main\TestGame\environment.dme --configuration Release --no-build
+      run: cd main/DMCompiler | dotnet run main\TestGame\environment.dme --configuration Release --no-build
     - name: Checkout Modified /tg/station
       uses: actions/checkout@v2
       with:
         repository: wixoaGit/tgstation
         path: tg
     - name: Compile Modified /tg/station
-      run: dotnet run tg\tgstation.dme --configuration Release --no-build
+      run: cd main/DMCompiler | dotnet run tg\tgstation.dme --configuration Release --no-build
