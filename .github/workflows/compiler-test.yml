@@ -27,8 +27,7 @@ jobs:
       shell: pwsh
       run: |
         cd main 
-        ls
-        dotnet build DMCompiler --configuration Release /m
+        dotnet build DMCompiler --configuration Release --framework net6.0 /m
     - name: Compile TestGame
       shell: pwsh
       run: cd main/DMCompiler | dotnet run main\TestGame\environment.dme --configuration Release --no-build
