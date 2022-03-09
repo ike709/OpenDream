@@ -2,44 +2,39 @@ name: Compile Test Codebases
 
 on:
   push:
-    branches: [ master  ]
+    branches: [ master ]
   pull_request:
-    branches: [ master  ]
+    branches: [ master ]
 
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+    
     steps:
     - name: Checkout Main
       uses: actions/checkout@v2
       with:
         path: main
-    - name: Setup submodule
-      run: |
-        cd main/
-        git submodule update --init --recursive
-    - name: Pull engine updates
-      uses: space-wizards/submodule-dependency@v0.1.5
-    - name: Update Engine Submodules
-      run: |
-        cd main/RobustToolbox/
-        git submodule update --init --recursive
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 6.0.100
-    - name: Install dependencies
-      run: dotnet restore main/OpenDream.sln
+    - name: Install Dependencies
+      run: dotnet restore main/DMCompiler
     - name: Build
-      run: dotnet build main/OpenDream.sln --configuration Release --no-restore /m
+      shell: pwsh
+      run: cd main | dotnet build DMCompiler --configuration Release --no-restore /m
     - name: Compile TestGame
-      run: main\DMCompiler\bin\Release\net6.0\DMCompiler.exe main\TestGame\environment.dme
-    - name: Run Unit Tests
-      run: dotnet test --no-build main\Content.Tests\Content.Tests.csproj --configuration Release
+      shell: pwsh
+      run: cd DMCompiler | dotnet run main\TestGame\environment.dme --configuration Release --no-build
     - name: Checkout Modified /tg/station
       uses: actions/checkout@v2
       with:
         repository: wixoaGit/tgstation
         path: tg
     - name: Compile Modified /tg/station
-      run: main\DMCompiler\bin\Release\net6.0\DMCompiler.exe tg\tgstation.dme 
+      run: dotnet run tg\tgstation.dme --configuration Release --no-build
