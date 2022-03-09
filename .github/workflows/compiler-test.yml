@@ -25,7 +25,10 @@ jobs:
         dotnet-version: 6.0.100
     - name: Build
       shell: pwsh
-      run: cd main | dotnet build DMCompiler --configuration Release /m
+      run: |
+        cd main 
+        ls
+        dotnet build DMCompiler --configuration Release /m
     - name: Compile TestGame
       shell: pwsh
       run: cd main/DMCompiler | dotnet run main\TestGame\environment.dme --configuration Release --no-build
