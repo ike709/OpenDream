@@ -27,7 +27,8 @@ jobs:
       shell: pwsh
       run: |
         cd main 
-        dotnet build DMCompiler --configuration Release --no-restore /m
+        dotnet build OpenDreamShared --configuration Release --framework net6.0
+        dotnet build DMCompiler --configuration Release 
     - name: Compile TestGame
       shell: pwsh
       run: cd main/DMCompiler | dotnet run main\TestGame\environment.dme --configuration Release --no-build
