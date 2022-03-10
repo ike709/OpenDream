@@ -4,6 +4,7 @@ using OpenDreamClient.Resources.ResourceTypes;
 using OpenDreamShared.Dream;
 using OpenDreamShared.Resources;
 using Robust.Client.Graphics;
+using Robust.Shared.Physics;
 
 namespace OpenDreamClient.Rendering {
     sealed class DreamIcon {
@@ -89,26 +90,29 @@ namespace OpenDreamClient.Rendering {
             _appearanceAnimation = null;
         }
 
-        public Box2 GetWorldAABB(Vector2? worldPos) {
+        public Box2 GetAABB(Transform? transform)
+        {
             Box2? aabb = null;
+
+            var position = transform?.Position ?? Vector2.Zero;
 
             if (DMI != null) {
                 Vector2 size = DMI.IconSize / (float)EyeManager.PixelsPerMeter;
                 Vector2 pixelOffset = Appearance.PixelOffset / (float)EyeManager.PixelsPerMeter;
 
-                worldPos += pixelOffset;
-                aabb = Box2.CenteredAround(worldPos ?? Vector2.Zero, size);
+                position += pixelOffset;
+                aabb = Box2.CenteredAround(position, size);
             }
 
             foreach (DreamIcon underlay in Underlays) {
-                Box2 underlayAABB = underlay.GetWorldAABB(worldPos);
+                Box2 underlayAABB = underlay.GetAABB(transform);
 
                 if (aabb == null) aabb = underlayAABB;
                 else aabb = aabb.Value.Union(underlayAABB);
             }
 
             foreach (DreamIcon overlay in Overlays) {
-                Box2 overlayAABB = overlay.GetWorldAABB(worldPos);
+                Box2 overlayAABB = overlay.GetAABB(transform);
 
                 if (aabb == null) aabb = overlayAABB;
                 else aabb = aabb.Value.Union(overlayAABB);
@@ -261,8 +265,9 @@ namespace OpenDreamClient.Rendering {
             Underlays.Sort(new Comparison<DreamIcon>(LayerSort));
         }
 
-        private void CheckSizeChange() {
-            Box2 aabb = GetWorldAABB(null);
+        private void CheckSizeChange()
+        {
+            Box2 aabb = GetAABB(null);
 
             if (aabb != _cachedAABB) {
                 _cachedAABB = aabb;

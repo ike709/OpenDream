@@ -7,11 +7,11 @@ using Robust.Shared.Maths;
 using System.Collections.Generic;
 
 namespace OpenDreamClient.Rendering {
-    class DreamViewOverlay : Overlay {
-        private IPlayerManager _playerManager = IoCManager.Resolve<IPlayerManager>();
-        private IEntityLookup _entityLookup = IoCManager.Resolve<IEntityLookup>();
-        private IEntityManager _entityManager = IoCManager.Resolve<IEntityManager>();
-        private RenderOrderComparer _renderOrderComparer = new RenderOrderComparer();
+    sealed class DreamViewOverlay : Overlay {
+        private readonly IPlayerManager _playerManager = IoCManager.Resolve<IPlayerManager>();
+        private readonly IEntityManager _entityManager = IoCManager.Resolve<IEntityManager>();
+
+        private readonly RenderOrderComparer _renderOrderComparer = new RenderOrderComparer();
 
         public override OverlaySpace Space => OverlaySpace.WorldSpace;
 
@@ -27,7 +27,7 @@ namespace OpenDreamClient.Rendering {
         private void DrawMap(DrawingHandleWorld handle, EntityUid eye) {
             List<DMISpriteComponent> sprites = new();
 
-            foreach (EntityUid entity in _entityLookup.GetEntitiesInRange(eye, 15)) {
+            foreach (EntityUid entity in EntitySystem.Get<EntityLookupSystem>().GetEntitiesInRange(eye, 15)) {
                 if (!_entityManager.TryGetComponent<DMISpriteComponent>(entity, out var sprite))
                     continue;
                 if (!sprite.IsVisible())

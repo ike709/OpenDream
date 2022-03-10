@@ -10,7 +10,7 @@ namespace OpenDreamClient {
     class DreamClientSystem : EntitySystem {
         [Dependency] private readonly IDreamMacroManager _macroManager = default!;
         [Dependency] private readonly IDreamInterfaceManager _interfaceManager = default!;
-        [Dependency] private readonly IEntityLookup _entityLookup = default!;
+        private readonly EntityLookupSystem _entityLookup = EntitySystem.Get<EntityLookupSystem>();
         [Dependency] private readonly IEntityManager _entityManager = default!;
 
         private List<EntityUid> _lookupTreeUpdateQueue = new();
@@ -25,7 +25,7 @@ namespace OpenDreamClient {
                 foreach (EntityUid entity in _lookupTreeUpdateQueue) {
                     if (_entityManager.TryGetComponent<TransformComponent>(entity, out var comp))
                     {
-                        _entityLookup.UpdateEntityTree(entity, comp);
+                        comp.RunDeferred();
                     }
                     else
                     {
