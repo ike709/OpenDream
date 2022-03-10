@@ -85,7 +85,7 @@ namespace OpenDreamClient.Rendering {
         private void OnIconSizeChanged() {
             //Changing the icon's size leads to a new AABB used for entity lookups
             //These AABBs are cached, and have to be queued for an update
-            EntitySystem.Get<DreamClientSystem>().QueueLookupTreeUpdate(Owner);
+            _entityManager.EventBus.RaiseLocalEvent(Owner, new UpdateLookupBoundsEvent());
         }
     }
 }
