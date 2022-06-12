@@ -1689,28 +1689,33 @@ namespace OpenDreamRuntime.Procs {
         public static ProcStatus? PickUnweighted(DMProcState state) {
             int count = state.ReadInt();
 
-            DreamValue[] values;
+            DreamValue picked = DreamValue.Null;
             if (count == 1) {
                 DreamValue value = state.Pop();
 
+                List<DreamValue> values;
                 if (value.TryGetValueAsDreamList(out DreamList list)) {
-                    values = list.GetValues().ToArray();
-                } else if (value.Value is DreamProcArguments args)
-                {
-                    values = args.GetAllArguments().ToArray();
-                }
-                else {
+                    values = list.GetValues();
+                } else if (value.Value is DreamProcArguments args) {
+                    values = args.GetAllArguments();
+                } else {
                     state.Push(value);
                     return null;
                 }
+
+                picked = values[state.DreamManager.Random.Next(0, values.Count)];
             } else {
-                values = new DreamValue[count];
+                int pickedIndex = state.DreamManager.Random.Next(0, count);
+
                 for (int i = 0; i < count; i++) {
-                    values[i] = state.Pop();
+                    DreamValue value = state.Pop();
+
+                    if (i == pickedIndex)
+                        picked = value;
                 }
             }
 
-            state.Push(values[state.DreamManager.Random.Next(0, values.Length)]);
+            state.Push(picked);
             return null;
         }
 
