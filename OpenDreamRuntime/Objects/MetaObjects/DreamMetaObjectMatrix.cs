@@ -1,8 +1,22 @@
 ﻿using OpenDreamShared.Dream;
 
 namespace OpenDreamRuntime.Objects.MetaObjects {
-    sealed class DreamMetaObjectMatrix : DreamMetaObjectDatum {
+    sealed class DreamMetaObjectMatrix : DreamMetaObjectRoot {
         private readonly IDreamManager _dreamManager = IoCManager.Resolve<IDreamManager>();
+
+        public override bool ShouldCallNew => true;
+
+        public DreamMetaObjectMatrix(DreamObjectDefinition definition) : base(definition){}
+
+        public override void OnVariableSet(DreamObject dreamObject, string variableName, DreamValue variableValue,
+            DreamValue oldVariableValue)
+        {
+            ParentType.OnVariableSet(dreamObject, variableName, variableValue, oldVariableValue);
+        }
+
+        public override DreamValue OnVariableGet(DreamObject dreamObject, string variableName, DreamValue variableValue) {
+            return ParentType.OnVariableGet(dreamObject, variableName, variableValue);
+        }
 
         public static float[] MatrixToFloatArray(DreamObject matrix) {
             if (!matrix.IsSubtypeOf(DreamPath.Matrix))
@@ -56,7 +70,7 @@ namespace OpenDreamRuntime.Objects.MetaObjects {
                 return new(output);
             }
 
-            return base.OperatorMultiply(a, b);
+            return ParentType.OperatorMultiply(a, b);
         }
     }
 }

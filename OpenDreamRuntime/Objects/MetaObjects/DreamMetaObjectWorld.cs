@@ -17,12 +17,12 @@ namespace OpenDreamRuntime.Objects.MetaObjects {
 
         private double TickLag { get => _gameTiming.TickPeriod.TotalMilliseconds / 100; }
 
-        public DreamMetaObjectWorld() {
+        public DreamMetaObjectWorld(DreamObjectDefinition def) : base(def) {
             IoCManager.InjectDependencies(this);
         }
 
         public override void OnObjectCreated(DreamObject dreamObject, DreamProcArguments creationArguments) {
-            base.OnObjectCreated(dreamObject, creationArguments);
+            ParentType.OnObjectCreated(dreamObject, creationArguments);
 
             _dreamManager.WorldContentsList = dreamObject.GetVariable("contents").GetValueAsDreamList();
 
@@ -43,7 +43,7 @@ namespace OpenDreamRuntime.Objects.MetaObjects {
         }
 
         public override void OnVariableSet(DreamObject dreamObject, string variableName, DreamValue variableValue, DreamValue oldVariableValue) {
-            base.OnVariableSet(dreamObject, variableName, variableValue, oldVariableValue);
+            ParentType.OnVariableSet(dreamObject, variableName, variableValue, oldVariableValue);
 
             switch (variableName) {
                 case "fps":
@@ -104,7 +104,7 @@ namespace OpenDreamRuntime.Objects.MetaObjects {
                     return new DreamValue((_viewRange.IsSquare && _viewRange.IsCenterable) ? _viewRange.Width : _viewRange.ToString());
                 }
                 default:
-                    return base.OnVariableGet(dreamObject, variableName, variableValue);
+                    return ParentType.OnVariableGet(dreamObject, variableName, variableValue);
             }
         }
 
