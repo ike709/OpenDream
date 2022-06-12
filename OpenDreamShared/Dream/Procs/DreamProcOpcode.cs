@@ -97,8 +97,8 @@ namespace OpenDreamShared.Dream.Procs {
         MassConcatenation = 0x5C,
         CreateTypeEnumerator = 0x5D,
         CreateMultidimensionalList = 0x5E,
-        Output = 0x5E,
-        Input = 0x5F
+        Output = 0x5F,
+        Input = 0x60
     }
 
     public enum DreamProcOpcodeParameterType {
