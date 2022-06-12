@@ -122,6 +122,7 @@ namespace OpenDreamRuntime.Procs.Native {
             DreamObjectDefinition icon = objectTree.GetObjectDefinition(DreamPath.Icon);
             icon.SetNativeProc(DreamProcNativeIcon.NativeProc_Width);
             icon.SetNativeProc(DreamProcNativeIcon.NativeProc_Height);
+            icon.SetNativeProc(DreamProcNativeIcon.NativeProc_Insert);
 
             DreamObjectDefinition world = objectTree.GetObjectDefinition(DreamPath.World);
             world.SetNativeProc(DreamProcNativeWorld.NativeProc_Export);
