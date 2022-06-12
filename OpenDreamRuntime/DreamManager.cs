@@ -134,7 +134,7 @@ namespace OpenDreamRuntime {
             ObjectTree.SetMetaObject(DreamPath.Movable, new DreamMetaObjectMovable(ObjectTree.GetObjectDefinition(DreamPath.Movable)));
             ObjectTree.SetMetaObject(DreamPath.Mob, new DreamMetaObjectMob(ObjectTree.GetObjectDefinition(DreamPath.Mob)));
             ObjectTree.SetMetaObject(DreamPath.Icon, new DreamMetaObjectIcon(ObjectTree.GetObjectDefinition(DreamPath.Icon)));
-            ObjectTree.SetMetaObject(DreamPath.Savefile, new DreamMetaObjectSavefile());
+            ObjectTree.SetMetaObject(DreamPath.Savefile, new DreamMetaObjectSavefile(ObjectTree.GetObjectDefinition(DreamPath.Savefile)));
         }
 
         public void SetGlobalNativeProc(NativeProc.HandlerFn func) {

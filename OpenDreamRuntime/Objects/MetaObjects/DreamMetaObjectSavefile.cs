@@ -10,11 +10,17 @@ using Robust.Shared.IoC;
 namespace OpenDreamRuntime.Objects.MetaObjects {
     class DreamMetaObjectSavefile : DreamMetaObjectRoot {
         private readonly DreamResourceManager _resourceManager = IoCManager.Resolve<DreamResourceManager>();
+
+
+        public DreamMetaObjectSavefile(DreamObjectDefinition def) : base(def){}
+
         public class Savefile {
             public DreamResource Resource;
             public string CurrentDirPath = "/";
             public Dictionary<string, SavefileDirectory> Directories;
             public SavefileDirectory CurrentDir { get => Directories[CurrentDirPath]; }
+
+
 
             public Savefile(DreamResource resource) {
                 Resource = resource;
@@ -55,17 +61,17 @@ namespace OpenDreamRuntime.Objects.MetaObjects {
             Savefile savefile = new Savefile(resource);
             ObjectToSavefile.Add(dreamObject, savefile);
 
-            base.OnObjectCreated(dreamObject, creationArguments);
+            ParentType.OnObjectCreated(dreamObject, creationArguments);
         }
 
         public override void OnObjectDeleted(DreamObject dreamObject) {
             ObjectToSavefile.Remove(dreamObject);
 
-            base.OnObjectDeleted(dreamObject);
+            ParentType.OnObjectDeleted(dreamObject);
         }
 
         public override void OnVariableSet(DreamObject dreamObject, string variableName, DreamValue variableValue, DreamValue oldVariableValue) {
-            base.OnVariableSet(dreamObject, variableName, variableValue, oldVariableValue);
+            ParentType.OnVariableSet(dreamObject, variableName, variableValue, oldVariableValue);
 
             Savefile savefile = ObjectToSavefile[dreamObject];
 
@@ -95,7 +101,7 @@ namespace OpenDreamRuntime.Objects.MetaObjects {
 
                     return new DreamValue(dirList);
                 }
-                default: return base.OnVariableGet(dreamObject, variableName, variableValue);
+                default: return ParentType.OnVariableGet(dreamObject, variableName, variableValue);
             }
         }
 
