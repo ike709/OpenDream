@@ -1792,6 +1792,7 @@ namespace OpenDreamRuntime.Procs {
 
                     switch (second.Type) {
                         case DreamValue.DreamValueType.Float: return firstValue == second.GetValueAsFloat();
+                        case DreamValue.DreamValueType.DreamPath:
                         case DreamValue.DreamValueType.DreamObject:
                         case DreamValue.DreamValueType.String: return false;
                     }
@@ -1814,6 +1815,7 @@ namespace OpenDreamRuntime.Procs {
 
                     switch (second.Type) {
                         case DreamValue.DreamValueType.DreamPath: return firstValue.Equals(second.GetValueAsPath());
+                        case DreamValue.DreamValueType.Float:
                         case DreamValue.DreamValueType.DreamObject:
                         case DreamValue.DreamValueType.String: return false;
                     }
