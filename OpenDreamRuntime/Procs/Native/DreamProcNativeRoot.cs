@@ -792,7 +792,15 @@ namespace OpenDreamRuntime.Procs.Native {
                 case JsonValueKind.String:
                     return new DreamValue(jsonElement.GetString());
                 case JsonValueKind.Number:
-                    return new DreamValue(jsonElement.GetUInt32());
+                    if (!jsonElement.TryGetSingle(out float floatValue)) {
+                        throw new Exception("Invalid number " + jsonElement);
+                    }
+                    
+                    return new DreamValue(floatValue);
+                case JsonValueKind.True:
+                    return new DreamValue(1);
+                case JsonValueKind.False:
+                    return new DreamValue(0);
                 case JsonValueKind.Null:
                     return DreamValue.Null;
                 default:
@@ -1514,25 +1522,20 @@ namespace OpenDreamRuntime.Procs.Native {
             string t2;
             if (!arguments.GetArgument(0, "T1").TryGetValueAsString(out var t1))
             {
-                if (!arguments.GetArgument(1, "T2").TryGetValueAsString(out var t))
+                if (!arguments.GetArgument(1, "T2").TryGetValueAsString(out _))
                 {
                     return new DreamValue(0);
                 }
 
                 return new DreamValue(1);
-
-            } else if (!arguments.GetArgument(1, "T2").TryGetValueAsString(out var t))
+            } else if (!arguments.GetArgument(1, "T2").TryGetValueAsString(out t2))
             {
                 return new DreamValue(-1);
             }
-            else
-            {
-                t2 = t;
-            }
 
-            t1 = t1.ToLower();
-            t2 = t2.ToLower();
-            return new DreamValue(string.Compare(t2, t1));
+            int comparison = string.Compare(t2, t1, StringComparison.OrdinalIgnoreCase);
+            int clamped = Math.Max(Math.Min(comparison, 1), -1); //Clamp return value between -1 and 1
+            return new DreamValue(clamped);
         }
 
         [DreamProc("sorttextEx")]
@@ -1542,23 +1545,20 @@ namespace OpenDreamRuntime.Procs.Native {
             string t2;
             if (!arguments.GetArgument(0, "T1").TryGetValueAsString(out var t1))
             {
-                if (!arguments.GetArgument(1, "T2").TryGetValueAsString(out var t))
+                if (!arguments.GetArgument(1, "T2").TryGetValueAsString(out _))
                 {
                     return new DreamValue(0);
                 }
 
                 return new DreamValue(1);
-
-            } else if (!arguments.GetArgument(1, "T2").TryGetValueAsString(out var t))
+            } else if (!arguments.GetArgument(1, "T2").TryGetValueAsString(out t2))
             {
                 return new DreamValue(-1);
             }
-            else
-            {
-                t2 = t;
-            }
 
-            return new DreamValue(string.Compare(t2, t1));
+            int comparison = string.Compare(t2, t1, StringComparison.Ordinal);
+            int clamped = Math.Max(Math.Min(comparison, 1), -1); //Clamp return value between -1 and 1
+            return new DreamValue(clamped);
         }
 
         [DreamProc("sound")]
