@@ -206,7 +206,7 @@ namespace DMCompiler.Compiler.DM {
                             DMASTProcStatement procStatement = ProcStatement();
 
                             if (procStatement != null) {
-                                procBlock = new DMASTProcBlockInner(loc, new DMASTProcStatement[] { procStatement });
+                                procBlock = new DMASTProcBlockInner(loc, procStatement);
                             }
                         }
 
@@ -846,7 +846,7 @@ namespace DMCompiler.Compiler.DM {
                     DMASTProcStatement statement = ProcStatement();
 
                     if (statement == null) Error("Expected body or statement");
-                    body = new DMASTProcBlockInner(loc, new DMASTProcStatement[] { statement });
+                    body = new DMASTProcBlockInner(loc, statement);
                 }
 
                 return new DMASTProcStatementSpawn(loc, delay ?? new DMASTConstantInteger(loc, 0), body);
@@ -874,12 +874,17 @@ namespace DMCompiler.Compiler.DM {
                 DMASTProcBlockInner elseBody = null;
 
                 if (procStatement != null) {
-                    body = new DMASTProcBlockInner(loc, new DMASTProcStatement[] { procStatement });
+                    //if (procStatement.IsSetStatement)
+                        //Warning("Empty if block detected", ifbody);
+                    body = new DMASTProcBlockInner(loc, procStatement);
                 } else {
                     body = ProcBlock();
                 }
 
-                if (body == null) body = new DMASTProcBlockInner(loc, new DMASTProcStatement[0]);
+                if (body == null)
+                {
+                    body = new DMASTProcBlockInner(loc);
+                }
                 Token afterIfBody = Current();
                 bool newLineAfterIf = Delimiter();
                 if (newLineAfterIf) Whitespace();
@@ -890,12 +895,12 @@ namespace DMCompiler.Compiler.DM {
                     procStatement = ProcStatement();
 
                     if (procStatement != null) {
-                        elseBody = new DMASTProcBlockInner(loc, new DMASTProcStatement[] { procStatement });
+                        elseBody = new DMASTProcBlockInner(loc, procStatement);
                     } else {
                         elseBody = ProcBlock();
                     }
 
-                    if (elseBody == null) elseBody = new DMASTProcBlockInner(loc, new DMASTProcStatement[0]);
+                    if (elseBody == null) elseBody = new DMASTProcBlockInner(loc);
                 } else if (newLineAfterIf) {
                     ReuseToken(afterIfBody);
                 }
@@ -1018,7 +1023,7 @@ namespace DMCompiler.Compiler.DM {
                         statement = ProcStatement();
                         if (statement == null) Error("Expected body or statement");
                     }
-                    body = new DMASTProcBlockInner(loc, new DMASTProcStatement[] { statement });
+                    body = new DMASTProcBlockInner(loc, statement);
                 }
 
                 return body;
@@ -1042,9 +1047,13 @@ namespace DMCompiler.Compiler.DM {
                     DMASTProcStatement statement = ProcStatement();
 
                     //Loops without a body are valid DM
-                    if (statement == null) statement = new DMASTProcStatementContinue(loc);
-
-                    body = new DMASTProcBlockInner(loc, new DMASTProcStatement[] { statement });
+                    if (statement == null)
+                    {
+                        //Warning("Empty while block detected", statement_token);
+                        statement = new DMASTProcStatementContinue(loc);
+                    }
+                    
+                    body = new DMASTProcBlockInner(loc, statement);
                 }
                 if(conditional is DMASTConstantInteger){
                     if(((DMASTConstantInteger)conditional).Value != 0){
@@ -1208,9 +1217,9 @@ namespace DMCompiler.Compiler.DM {
                     var loc = Current().Location;
 
                     if (statement != null) {
-                        body = new DMASTProcBlockInner(loc, new DMASTProcStatement[] { statement });
+                        body = new DMASTProcBlockInner(loc,statement);
                     } else {
-                        body = new DMASTProcBlockInner(loc, new DMASTProcStatement[0]);
+                        body = new DMASTProcBlockInner(loc);
                     }
                 }
 
@@ -1228,9 +1237,9 @@ namespace DMCompiler.Compiler.DM {
                     DMASTProcStatement statement = ProcStatement();
 
                     if (statement != null) {
-                        body = new DMASTProcBlockInner(loc, new DMASTProcStatement[] { statement });
+                        body = new DMASTProcBlockInner(loc, statement);
                     } else {
-                        body = new DMASTProcBlockInner(loc, new DMASTProcStatement[0]);
+                        body = new DMASTProcBlockInner(loc);
                     }
                 }
 
@@ -1250,7 +1259,7 @@ namespace DMCompiler.Compiler.DM {
                     DMASTProcStatement statement = ProcStatement();
 
                     if (statement == null) Error("Expected body or statement");
-                    tryBody = new DMASTProcBlockInner(loc, new DMASTProcStatement[] { statement });
+                    tryBody = new DMASTProcBlockInner(loc,statement);
                 }
 
                 if (_unimplementedWarnings)
@@ -1277,7 +1286,7 @@ namespace DMCompiler.Compiler.DM {
                 if (catchBody == null) {
                     DMASTProcStatement statement = ProcStatement();
 
-                    if (statement != null) catchBody = new DMASTProcBlockInner(loc, new DMASTProcStatement[] { statement });
+                    if (statement != null) catchBody = new DMASTProcBlockInner(loc, statement);
                 }
 
                 return new DMASTProcStatementTryCatch(loc, tryBody, catchBody, parameter);
@@ -1313,7 +1322,7 @@ namespace DMCompiler.Compiler.DM {
                 var loc = Current().Location;
                 DMASTProcStatement statement = ProcStatement();
 
-                if (statement != null) body = new DMASTProcBlockInner(loc, new DMASTProcStatement[] { statement });
+                if (statement != null) body = new DMASTProcBlockInner(loc, statement);
             }
             return new DMASTProcStatementLabel(expression.Location, expression.Identifier, body);
         }
