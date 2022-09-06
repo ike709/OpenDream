@@ -51,7 +51,10 @@ namespace OpenDreamClient {
         }
 
         public override void PostInit() {
-            IoCManager.Resolve<ILightManager>().Enabled = false;
+            var lightMan = IoCManager.Resolve<ILightManager>();
+            lightMan.DrawLighting = false;
+            lightMan.DrawShadows = false;
+            lightMan.DrawHardFov = true;
 
             IoCManager.Resolve<IOverlayManager>().AddOverlay(new DreamViewOverlay());
 

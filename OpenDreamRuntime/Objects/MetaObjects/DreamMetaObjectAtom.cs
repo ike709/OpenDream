@@ -11,6 +11,7 @@ namespace OpenDreamRuntime.Objects.MetaObjects {
 
         [Dependency] private readonly IDreamManager _dreamManager = default!;
         [Dependency] private readonly IAtomManager _atomManager = default!;
+        [Dependency] private readonly IEntityManager _entityManager = default!;
 
         public DreamMetaObjectAtom() {
             IoCManager.InjectDependencies(this);
@@ -18,8 +19,13 @@ namespace OpenDreamRuntime.Objects.MetaObjects {
 
         public void OnObjectCreated(DreamObject dreamObject, DreamProcArguments creationArguments) {
             _dreamManager.WorldContentsList.AddValue(new DreamValue(dreamObject));
-
             ParentType?.OnObjectCreated(dreamObject, creationArguments);
+
+            dreamObject.GetVariable("opacity").TryGetValueAsInteger(out var opacity);
+            if (opacity == 1)
+            {
+                SetOccluder(dreamObject, true);
+            }
         }
 
         public void OnObjectDeleted(DreamObject dreamObject) {
@@ -32,12 +38,42 @@ namespace OpenDreamRuntime.Objects.MetaObjects {
             ParentType?.OnObjectDeleted(dreamObject);
         }
 
+        private void SetOccluder(DreamObject dreamObject, bool enabled)
+        {
+            EntityUid entity = _atomManager.GetMovableEntity(dreamObject);
+            if (enabled)
+            {
+                if (_entityManager.TryGetComponent(entity, out OccluderComponent? occluder))
+                {
+                    occluder.Enabled = true;
+                    return;
+                }
+                var comp = _entityManager.AddComponent<OccluderComponent>(entity);
+                comp.Enabled = true;
+            } else {
+                if (!_entityManager.TryGetComponent(entity, out OccluderComponent? occluder))
+                    return;
+                occluder.Enabled = false;
+            }
+        }
+
         public void OnVariableSet(DreamObject dreamObject, string varName, DreamValue value, DreamValue oldValue)
         {
             ParentType?.OnVariableSet(dreamObject, varName, value, oldValue);
 
             switch (varName)
             {
+                case "opacity":
+                    if (!value.TryGetValueAsInteger(out var opacity))
+                        break;
+
+                    // TODO: What does BYOND do for invalid opacity?
+                    if(opacity != 1 && opacity != 0)
+                        break;
+
+                    SetOccluder(dreamObject, opacity == 1);
+                    break;
+
                 case "icon":
                     _atomManager.UpdateAppearance(dreamObject, appearance => {
                         if (value.TryGetValueAsDreamResource(out DreamResource resource)) {
