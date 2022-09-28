@@ -244,7 +244,7 @@ namespace DMCompiler.Compiler.DM {
 
                             if (value == null) value = new DMASTConstantNull(loc);
 
-                            var valType = AsTypes();
+                            var valType = AsTypes() ?? DMValueType.Anything;
                             var varDef = new DMASTObjectVarDefinition(loc, varPath, value, valType);
 
                             varDefinitions.Add(varDef);
@@ -1475,7 +1475,7 @@ namespace DMCompiler.Compiler.DM {
                     value = Expression();
                 }
 
-                type = AsTypes();
+                type = AsTypes() ?? DMValueType.Anything;
                 Whitespace();
 
                 if (Check(TokenType.DM_In)) {
@@ -1818,7 +1818,7 @@ namespace DMCompiler.Compiler.DM {
                 var loc = Current().Location;
                 while (Check(TokenType.DM_StarStar)) {
                     Whitespace();
-                    DMASTExpression b = ExpressionUnary();
+                    DMASTExpression b = ExpressionPower();
                     if (b == null) Error("Expected an expression");
                     a = new DMASTPower(loc, a, b);
                 }
@@ -2413,7 +2413,7 @@ namespace DMCompiler.Compiler.DM {
                         return new DMASTProb(identifier.Location, callParameters[0].Value);
                     case "input": {
                         Whitespace();
-                        DMValueType types = AsTypes(defaultType: DMValueType.Text);
+                        DMValueType? types = AsTypes();
                         Whitespace();
                         DMASTExpression list = null;
 
@@ -2506,10 +2506,10 @@ namespace DMCompiler.Compiler.DM {
             return expression;
         }
 
-        private DMValueType AsTypes(DMValueType defaultType = DMValueType.Anything) {
-            DMValueType type = DMValueType.Anything;
-
+        private DMValueType? AsTypes() {
             if (Check(TokenType.DM_As)) {
+                DMValueType type = DMValueType.Anything;
+
                 Whitespace();
                 bool parenthetical = Check(TokenType.DM_LeftParenthesis);
                 bool closed = false;
@@ -2551,11 +2551,11 @@ namespace DMCompiler.Compiler.DM {
                     Whitespace();
                     ConsumeRightParenthesis();
                 }
-            } else {
-                return defaultType;
+
+                return type;
             }
 
-            return type;
+            return null;
         }
 
         private bool Delimiter() {
