@@ -2174,7 +2174,22 @@ namespace OpenDreamRuntime.Procs.Native {
             DreamList list = DreamList.Create();
 
             foreach (DreamValue type in arguments.GetAllArguments()) {
-                DreamPath typePath = type.GetValueAsPath();
+                if (!type.TryGetValueAsPath(out var typePath)) {
+                    if (!type.TryGetValueAsDreamObject(out var typeObj) || typeObj?.ObjectDefinition is null || typeObj is DreamList) {
+                        if (type.TryGetValueAsString(out var typeString)) {
+                            var stringToPath = new DreamPath(typeString);
+                            if (DreamManager.ObjectTree.HasTreeEntry(stringToPath)) {
+                                typePath = stringToPath;
+                            } else {
+                                continue;
+                            }
+                        } else {
+                            continue;
+                        }
+                    } else {
+                        typePath = typeObj.ObjectDefinition.Type;
+                    }
+                }
 
                 if (typePath.LastElement == "proc") {
                     DreamPath objectTypePath = typePath.AddToPath("..");
