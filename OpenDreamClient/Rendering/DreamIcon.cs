@@ -258,7 +258,7 @@ namespace OpenDreamClient.Rendering {
             }
 
             Overlays.Sort(LayerSort);
-            Underlays.Sort(LayerSort);
+            Underlays.Sort(LayerSort);           
         }
 
         private void CheckSizeChange() {
