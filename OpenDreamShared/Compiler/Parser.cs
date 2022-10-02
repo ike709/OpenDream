@@ -17,6 +17,9 @@ namespace OpenDreamShared.Compiler {
             Advance();
         }
 
+        /// <summary>
+        /// Does not consume; this is simply a friendly getter.
+        /// </summary>
         protected Token Current() {
             return _currentToken;
         }
@@ -77,12 +80,14 @@ namespace OpenDreamShared.Compiler {
             }
         }
 
-        protected void Consume(TokenType[] types, string errorMessage) {
+        /// <returns>The <see cref="TokenType"/> that was found.</returns>
+        protected TokenType Consume(TokenType[] types, string errorMessage) {
             foreach (TokenType type in types) {
-                if (Check(type)) return;
+                if (Check(type)) return type;
             }
 
             Error(errorMessage);
+            return TokenType.Unknown;
         }
 
         protected void Error(string message, bool throwException = true) {
@@ -94,7 +99,7 @@ namespace OpenDreamShared.Compiler {
 
         protected void Warning(string message, Token token = null) {
             token ??= _currentToken;
-            Warnings.Add(new CompilerWarning(token, message));
+            Warnings.Add(new CompilerWarning(token, message)); /// Parser warnings are secretly CompilerWarnings!! Woag!!!!!!!
         }
     }
 }
