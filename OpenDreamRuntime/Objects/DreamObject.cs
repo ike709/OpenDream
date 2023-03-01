@@ -10,6 +10,20 @@ namespace OpenDreamRuntime.Objects {
         public bool Deleted { get; private set; } = false;
 
         private Dictionary<string, DreamValue>? _variables;
+        private List<DreamObject>? _turfContents;
+
+        public void ContentsAdd(DreamObject obj) {
+            _turfContents ??= new List<DreamObject>(1);
+            _turfContents.Add(obj);
+        }
+
+        public void ContentsRemove(DreamObject obj) {
+            _turfContents?.Remove(obj);
+        }
+
+        public List<DreamObject>? ContentsGet() {
+            return _turfContents ?? null;
+        }
 
         public DreamObject(DreamObjectDefinition objectDefinition) {
             ObjectDefinition = objectDefinition;

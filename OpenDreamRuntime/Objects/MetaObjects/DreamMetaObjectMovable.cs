@@ -59,10 +59,16 @@ namespace OpenDreamRuntime.Objects.MetaObjects {
                 case "loc": {
                     EntityUid entity = _atomManager.GetMovableEntity(dreamObject);
 
+                    if(oldValue.TryGetValueAsDreamObjectOfType(_objectTree.Turf, out var oldTurf))
+                    {
+                        oldTurf?.ContentsRemove(dreamObject);
+                    }
+
                     if (value.TryGetValueAsDreamObjectOfType(_objectTree.Turf, out var turfLoc)) {
                         (Vector2i pos, DreamMapManager.Level level) = _dreamMapManager.GetTurfPosition(turfLoc);
                         _transformSystem.SetParent(entity, level.Grid.Owner);
                         _transformSystem.SetWorldPosition(entity, pos);
+                        turfLoc.ContentsAdd(dreamObject);
                     } else if (value.TryGetValueAsDreamObjectOfType(_objectTree.Movable, out var movableLoc)) {
                         EntityUid locEntity = _atomManager.GetMovableEntity(movableLoc);
                         _transformSystem.SetParent(entity, locEntity);

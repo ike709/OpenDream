@@ -46,21 +46,33 @@ namespace OpenDreamRuntime.Objects.MetaObjects {
                 case "contents": {
                     (Vector2i pos, DreamMapManager.Level level) = _dreamMapManager.GetTurfPosition(dreamObject);
 
-                    HashSet<EntityUid> entities = _entityLookup.GetEntitiesIntersecting(level.Grid.Owner, pos, LookupFlags.Uncontained);
-                    DreamList contents = _objectTree.CreateList(entities.Count);
-                    foreach (EntityUid movableEntity in entities) {
-                        if (!_transformQuery.TryGetComponent(movableEntity, out var transform))
-                            continue;
+                    var cachedContents = dreamObject.ContentsGet();
+                    DreamList contents;
 
-                        // Entities on neighboring tiles seem to be caught as well
-                        if (transform.WorldPosition != pos)
-                            continue;
-                        if (transform.ParentUid != level.Grid.Owner)
-                            continue;
-                        if (!_atomManager.TryGetMovableFromEntity(movableEntity, out var movable))
-                            continue;
+                    if (cachedContents is null) {
+                        HashSet<EntityUid> entities = _entityLookup.GetEntitiesIntersecting(level.Grid.Owner, pos, LookupFlags.Uncontained);
+                        contents = _objectTree.CreateList(entities.Count);
 
-                        contents.AddValue(new(movable));
+                        foreach (EntityUid movableEntity in entities) {
+                            if (!_transformQuery.TryGetComponent(movableEntity, out var transform))
+                                continue;
+
+                            // Entities on neighboring tiles seem to be caught as well
+                            if (transform.WorldPosition != pos)
+                                continue;
+                            if (transform.ParentUid != level.Grid.Owner)
+                                continue;
+                            if (!_atomManager.TryGetMovableFromEntity(movableEntity, out var movable))
+                                continue;
+
+                            contents.AddValue(new DreamValue(movable));
+                            dreamObject.ContentsAdd(movable);
+                        }
+                    } else {
+                        contents = _objectTree.CreateList(cachedContents.Count);
+                        foreach (var obj in cachedContents) {
+                            contents.AddValue(new DreamValue(obj));
+                        }
                     }
 
                     return new(contents);
