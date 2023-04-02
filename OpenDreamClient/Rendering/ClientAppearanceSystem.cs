@@ -6,9 +6,10 @@ using Robust.Client.Graphics;
 using Robust.Shared.Prototypes;
 using OpenDreamClient.Resources;
 using OpenDreamClient.Resources.ResourceTypes;
+using Robust.Client.GameObjects;
 
 namespace OpenDreamClient.Rendering {
-    sealed class ClientAppearanceSystem : SharedAppearanceSystem {
+    sealed class ClientAppearanceSystem : SharedAppearanceSystem, IEntityEventSubscriber {
         private Dictionary<uint, IconAppearance> _appearances = new();
         private readonly Dictionary<uint, List<Action<IconAppearance>>> _appearanceLoadCallbacks = new();
         private readonly Dictionary<uint, DreamIcon> _turfIcons = new();
@@ -28,6 +29,14 @@ namespace OpenDreamClient.Rendering {
             SubscribeNetworkEvent<NewAppearanceEvent>(OnNewAppearance);
             SubscribeNetworkEvent<AnimationEvent>(OnAnimation);
             SubscribeLocalEvent<GridModifiedEvent>(OnGridModified);
+            EntityManager.EventBus.SubscribeEvent<ClientOccluderSystem.OccluderDirectionsEvent>(EventSource.Local, this,
+                OnOccluderUpdate);
+        }
+
+        private void OnOccluderUpdate(ref ClientOccluderSystem.OccluderDirectionsEvent args) {
+            if (args.Sender.IsClientSide()) return;
+
+
         }
 
         public override void Shutdown() {

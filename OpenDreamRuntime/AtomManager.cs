@@ -21,6 +21,7 @@ namespace OpenDreamRuntime {
         private readonly Dictionary<EntityUid, DreamObject> _entityToAtom = new();
 
         private ServerAppearanceSystem? _appearanceSystem;
+        private OccluderSystem? _occluderSystem;
 
         private EntityUid CreateMovableEntity(DreamObject atom) {
             EntityUid entity = _entityManager.SpawnEntity(null, new MapCoordinates(0, 0, MapId.Nullspace));
@@ -90,12 +91,22 @@ namespace OpenDreamRuntime {
                 update(appearance);
                 _dreamMapManager.SetTurfAppearance(atom, appearance);
             } else if (atom.IsSubtypeOf(_objectTree.Movable)) {
-                if (!_entityManager.TryGetComponent<DMISpriteComponent>(GetMovableEntity(atom), out var sprite))
+                var uid = GetMovableEntity(atom);
+                if (!_entityManager.TryGetComponent<DMISpriteComponent>(uid, out var sprite))
                     return;
 
                 IconAppearance appearance = new IconAppearance(sprite.Appearance);
                 update(appearance);
                 sprite.SetAppearance(appearance);
+
+                var hasOccluder = _entityManager.TryGetComponent<OccluderComponent>(uid, out var occluder);
+
+                if (appearance.Opacity && !hasOccluder) {
+                    _entityManager.AddComponent<OccluderComponent>(uid);
+                }
+
+                _occluderSystem ??= _entitySystemManager.GetEntitySystem<OccluderSystem>();
+                _occluderSystem.SetEnabled(uid, appearance.Opacity, occluder);
             }
         }
 
