@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using CommunityToolkit.Diagnostics;
 using OpenDreamRuntime.Objects;
 using OpenDreamRuntime.Resources;
 using OpenDreamShared.Dream;
@@ -13,7 +14,7 @@ namespace OpenDreamRuntime.Procs {
         public static (string, Dictionary<string, DreamValue>, List<String>) GetNativeInfo(Delegate func) {
             List<Attribute> attributes = new(func.GetInvocationList()[0].Method.GetCustomAttributes());
             DreamProcAttribute procAttribute = (DreamProcAttribute)attributes.Find(attribute => attribute is DreamProcAttribute);
-            if (procAttribute == null) throw new ArgumentException();
+            Guard.IsNotNull(procAttribute);
 
             Dictionary<string, DreamValue> defaultArgumentValues = null;
             var argumentNames = new List<string>();

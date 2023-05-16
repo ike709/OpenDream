@@ -2,6 +2,7 @@
 using OpenDreamShared.Dream.Procs;
 using System.Globalization;
 using System.Linq;
+using CommunityToolkit.Diagnostics;
 
 namespace OpenDreamRuntime.Objects {
     [Virtual]
@@ -23,9 +24,7 @@ namespace OpenDreamRuntime.Objects {
         }
 
         public ProcState InitProc(DreamThread thread, DreamObject? usr, DreamProcArguments arguments) {
-            if (Deleted) {
-                throw new Exception("Cannot init proc on a deleted object");
-            }
+            Guard.IsFalse(Deleted);
 
             if (!InitDreamObjectState.Pool.TryPop(out var state)) {
                 state = new InitDreamObjectState(ObjectDefinition.DreamManager, ObjectDefinition.ObjectTree);
@@ -71,9 +70,7 @@ namespace OpenDreamRuntime.Objects {
         }
 
         public DreamValue GetVariable(string name) {
-            if(Deleted){
-                throw new NullReferenceException("Cannot read " + name + " on a deleted object");
-            }
+            Guard.IsFalse(Deleted);
             if (TryGetVariable(name, out DreamValue variableValue)) {
                 return variableValue;
             } else {
@@ -88,16 +85,12 @@ namespace OpenDreamRuntime.Objects {
         }
 
         public IEnumerable<string> GetVariableNames() {
-            if (Deleted) {
-                throw new Exception("Cannot get variable names of a deleted object");
-            }
+            Guard.IsFalse(Deleted);
             return ObjectDefinition.Variables.Keys;
         }
 
         public bool TryGetVariable(string name, out DreamValue variableValue) {
-            if(Deleted){
-                throw new Exception("Cannot try to get variable on a deleted object");
-            }
+            Guard.IsFalse(Deleted);
 
             if ((_variables?.TryGetValue(name, out variableValue) is true) || ObjectDefinition.Variables.TryGetValue(name, out variableValue)) {
                 if (ObjectDefinition.MetaObject != null) variableValue = ObjectDefinition.MetaObject.OnVariableGet(this, name, variableValue);
@@ -112,9 +105,7 @@ namespace OpenDreamRuntime.Objects {
         /// Handles setting a variable, and special behavior by calling OnVariableSet()
         /// </summary>
         public void SetVariable(string name, DreamValue value) {
-            if(Deleted){
-                throw new Exception("Cannot set variable on a deleted object!");
-            }
+            Guard.IsFalse(Deleted);
             var oldValue = SetVariableValue(name, value);
             if (ObjectDefinition.MetaObject != null) ObjectDefinition.MetaObject.OnVariableSet(this, name, value, oldValue);
         }
@@ -124,9 +115,7 @@ namespace OpenDreamRuntime.Objects {
         /// </summary>
         /// <returns>The OLD variable value</returns>
         public DreamValue SetVariableValue(string name, DreamValue value) {
-            if(Deleted){
-                throw new Exception("Cannot set variable on a deleted object");
-            }
+            Guard.IsFalse(Deleted);
             if (_variables?.TryGetValue(name, out DreamValue oldValue) is not true)
                 oldValue = ObjectDefinition.Variables[name];
             _variables ??= new();
@@ -135,23 +124,17 @@ namespace OpenDreamRuntime.Objects {
         }
 
         public DreamProc GetProc(string procName) {
-            if(Deleted){
-                throw new Exception("Cannot get proc on a deleted object");
-            }
+            Guard.IsFalse(Deleted);
             return ObjectDefinition.GetProc(procName);
         }
 
         public bool TryGetProc(string procName, out DreamProc proc) {
-            if(Deleted){
-                throw new Exception("Cannot try to get proc on a deleted object");
-            }
+            Guard.IsFalse(Deleted);
             return ObjectDefinition.TryGetProc(procName, out proc);
         }
 
         public DreamValue SpawnProc(string procName, DreamObject? usr = null, params DreamValue[] arguments) {
-            if(Deleted){
-                throw new Exception("Cannot spawn proc on a deleted object");
-            }
+            Guard.IsFalse(Deleted);
 
             var proc = GetProc(procName);
             return DreamThread.Run(proc, this, usr, arguments);

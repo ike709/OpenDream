@@ -1,4 +1,5 @@
-﻿using OpenDreamRuntime.Procs;
+﻿using CommunityToolkit.Diagnostics;
+using OpenDreamRuntime.Procs;
 
 namespace OpenDreamRuntime.Objects.MetaObjects {
     public interface IDreamMetaObject {
@@ -18,50 +19,43 @@ namespace OpenDreamRuntime.Objects.MetaObjects {
             ParentType?.OnVariableGet(dreamObject, varName, value) ?? value;
 
         public void OperatorOutput(DreamObject a, DreamValue b) {
-            if (ParentType == null)
-                throw new InvalidOperationException($"Cannot output {b} to {a}");
+            Guard.IsNotNull(ParentType);
 
             ParentType.OperatorOutput(a, b);
         }
 
         public DreamValue OperatorAdd(DreamValue a, DreamValue b) {
-            if (ParentType == null)
-                throw new InvalidOperationException($"Addition cannot be done between {a} and {b}");
+            Guard.IsNotNull(ParentType);
 
             return ParentType.OperatorAdd(a, b);
         }
 
         public DreamValue OperatorSubtract(DreamValue a, DreamValue b) {
-            if (ParentType == null)
-                throw new InvalidOperationException($"Subtraction cannot be done between {a} and {b}");
+            Guard.IsNotNull(ParentType);
 
             return ParentType.OperatorSubtract(a, b);
         }
 
         public DreamValue OperatorMultiply(DreamValue a, DreamValue b) {
-            if (ParentType == null)
-                throw new InvalidOperationException($"Multiplication cannot be done between {a} and {b}");
+            Guard.IsNotNull(ParentType);
 
             return ParentType.OperatorMultiply(a, b);
         }
 
         public DreamValue OperatorAppend(DreamValue a, DreamValue b) {
-            if (ParentType == null)
-                throw new InvalidOperationException($"Cannot append {b} to {a}");
+            Guard.IsNotNull(ParentType);
 
             return ParentType.OperatorAppend(a, b);
         }
 
         public DreamValue OperatorRemove(DreamValue a, DreamValue b) {
-            if (ParentType == null)
-                throw new InvalidOperationException($"Cannot remove {b} from {a}");
+            Guard.IsNotNull(ParentType);
 
             return ParentType.OperatorRemove(a, b);
         }
 
         public DreamValue OperatorOr(DreamValue a, DreamValue b) {
-            if (ParentType == null)
-                throw new InvalidOperationException($"Cannot or {a} and {b}");
+            Guard.IsNotNull(ParentType);
 
             return ParentType.OperatorOr(a, b);
         }
@@ -74,29 +68,25 @@ namespace OpenDreamRuntime.Objects.MetaObjects {
         }
 
         public DreamValue OperatorCombine(DreamValue a, DreamValue b) {
-            if (ParentType == null)
-                throw new InvalidOperationException($"Cannot combine {a} and {b}");
+            Guard.IsNotNull(ParentType);
 
             return ParentType.OperatorCombine(a, b);
         }
 
         public DreamValue OperatorMask(DreamValue a, DreamValue b) {
-            if (ParentType == null)
-                throw new InvalidOperationException($"Cannot mask {a} and {b}");
+            Guard.IsNotNull(ParentType);
 
             return ParentType.OperatorMask(a, b);
         }
 
         public DreamValue OperatorIndex(DreamObject dreamObject, DreamValue index) {
-            if (ParentType == null)
-                throw new InvalidOperationException($"Cannot index {dreamObject}");
+            Guard.IsNotNull(ParentType);
 
             return ParentType.OperatorIndex(dreamObject, index);
         }
 
         public void OperatorIndexAssign(DreamObject dreamObject, DreamValue index, DreamValue value) {
-            if (ParentType == null)
-                throw new InvalidOperationException($"Cannot assign {value} to index {index} of {dreamObject}");
+            Guard.IsNotNull(ParentType);
 
             ParentType.OperatorIndexAssign(dreamObject, index, value);
         }

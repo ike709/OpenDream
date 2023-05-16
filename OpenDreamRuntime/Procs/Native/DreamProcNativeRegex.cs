@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using CommunityToolkit.Diagnostics;
 using OpenDreamRuntime.Objects;
 using OpenDreamRuntime.Objects.MetaObjects;
 using OpenDreamShared.Dream;
@@ -79,9 +80,7 @@ namespace OpenDreamRuntime.Procs.Native {
             throw new ArgumentException("Replacement argument must be a string or a proc");
 
             async Task<DreamValue> DoProcReplace(AsyncNativeProc.State state, DreamProc proc) {
-                if (regex.IsGlobal) {
-                    throw new NotImplementedException("Proc global regex replacements are not implemented");
-                }
+                Guard.IsFalse(regex.IsGlobal);
 
                 var match = regex.Regex.Match(haystackSubstring);
                 var groups = match.Groups;

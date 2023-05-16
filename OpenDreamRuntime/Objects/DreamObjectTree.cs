@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Threading.Tasks;
+using CommunityToolkit.Diagnostics;
 using OpenDreamRuntime.Objects.MetaObjects;
 using OpenDreamRuntime.Procs;
 using OpenDreamRuntime.Procs.DebugAdapter;
@@ -145,8 +146,7 @@ namespace OpenDreamRuntime.Objects {
             switch (jsonElement.ValueKind) {
                 case JsonValueKind.String:
                     var str = jsonElement.GetString();
-                    if (str == null)
-                        throw new NullNotAllowedException();
+                    Guard.IsNotNull(str);
 
                     return new DreamValue(str);
                 case JsonValueKind.Number:
@@ -157,8 +157,7 @@ namespace OpenDreamRuntime.Objects {
                     switch (variableType) {
                         case JsonVariableType.Resource: {
                             var resourcePath = jsonElement.GetProperty("resourcePath").GetString();
-                            if (resourcePath == null)
-                                throw new NullNotAllowedException();
+                            Guard.IsNotNull(resourcePath);
 
                             var resM = IoCManager.Resolve<DreamResourceManager>();
                             DreamResource resource = resM.LoadResource(resourcePath);

@@ -15,6 +15,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
+using CommunityToolkit.Diagnostics;
 using DreamValueType = OpenDreamRuntime.DreamValue.DreamValueType;
 using Robust.Server;
 using Robust.Shared.Asynchronous;
@@ -519,8 +520,7 @@ namespace OpenDreamRuntime.Procs.Native {
             }
 
             DreamFilter? filter = serializationManager.Read(filterType, attributes) as DreamFilter;
-            if (filter is null)
-                throw new Exception($"Failed to create filter of type {filterType}");
+            Guard.IsNotNull(filter);
 
             DreamObject filterObject = state.ObjectTree.CreateObject(state.ObjectTree.Filter);
             DreamMetaObjectFilter.DreamObjectToFilter[filterObject] = filter;

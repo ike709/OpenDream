@@ -1,5 +1,6 @@
 ﻿using OpenDreamShared.Dream;
 using System.Collections.Immutable;
+using CommunityToolkit.Diagnostics;
 
 namespace OpenDreamRuntime.Objects.MetaObjects {
     sealed class DreamMetaObjectMatrix : IDreamMetaObject {
@@ -233,8 +234,7 @@ namespace OpenDreamRuntime.Objects.MetaObjects {
                 return new(output);
             }
 
-            if (ParentType == null)
-                throw new InvalidOperationException($"Multiplication cannot be done between {a} and {b}");
+            Guard.IsNotNull(ParentType);
 
             return ParentType.OperatorMultiply(a, b);
         }

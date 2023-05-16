@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Linq;
 using System.Text;
+using CommunityToolkit.Diagnostics;
 using OpenDreamRuntime.Objects;
 using OpenDreamRuntime.Objects.MetaObjects;
 using OpenDreamRuntime.Procs.DebugAdapter;
@@ -403,8 +404,7 @@ namespace OpenDreamRuntime.Procs {
         }
 
         public void SetArgument(int id, DreamValue value) {
-            if (id < 0 || id >= ArgumentCount)
-                throw new IndexOutOfRangeException($"Given argument id ({id}) was out of range");
+            Guard.IsBetween(id, -1, ArgumentCount);
 
             _localVariables[id] = value;
         }
@@ -603,8 +603,7 @@ namespace OpenDreamRuntime.Procs {
                     return DereferenceField(owner, reference.Name);
                 }
                 case DMReference.Type.SrcField: {
-                    if (Instance == null)
-                        throw new Exception($"Cannot get field src.{reference.Name} in global proc");
+                    Guard.IsNotNull(Instance);
                     if (!Instance.TryGetVariable(reference.Name, out var fieldValue))
                         throw new Exception($"Type {Instance.ObjectDefinition!.Type} has no field called \"{reference.Name}\"");
 
@@ -738,10 +737,8 @@ namespace OpenDreamRuntime.Procs {
                 case DMCallArgumentsType.FromStack:
                     return new DreamProcArguments(values);
                 case DMCallArgumentsType.FromStackKeyed: {
-                    if (argumentStackSize % 2 != 0)
-                        throw new ArgumentException("Argument stack size must be even", nameof(argumentStackSize));
-                    if (proc == null)
-                        throw new Exception("Cannot use named arguments here");
+                    Guard.IsEqualTo(argumentStackSize % 2, 0);
+                    Guard.IsNotNull(proc);
 
                     var argumentCount = argumentStackSize / 2;
                     var arguments = new DreamValue[Math.Max(argumentCount, proc.ArgumentNames.Count)];
@@ -766,8 +763,7 @@ namespace OpenDreamRuntime.Procs {
                     return new DreamProcArguments(arguments);
                 }
                 case DMCallArgumentsType.FromArgumentList: {
-                    if (proc == null)
-                        throw new Exception("Cannot use an arglist here");
+                    Guard.IsNotNull(proc);
                     if (!values[0].TryGetValueAsDreamList(out var argList))
                         return new DreamProcArguments(); // Using a non-list gives you no arguments
 

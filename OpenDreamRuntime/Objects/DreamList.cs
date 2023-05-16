@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Runtime.CompilerServices;
+using CommunityToolkit.Diagnostics;
 using OpenDreamRuntime.Objects.MetaObjects;
 using OpenDreamRuntime.Procs;
 using OpenDreamRuntime.Rendering;
@@ -313,8 +314,8 @@ namespace OpenDreamRuntime.Objects {
         public override DreamValue GetValue(DreamValue key) {
             if (!key.TryGetValueAsInteger(out var index))
                 throw new Exception($"Invalid index into verbs list: {key}");
-            if (index < 1 || index > _verbs.Count)
-                throw new Exception($"Out of bounds index on verbs list: {index}");
+
+            Guard.IsBetweenOrEqualTo(index, 1, _verbs.Count);
 
             return new DreamValue(_verbs[index - 1]);
         }
@@ -384,8 +385,8 @@ namespace OpenDreamRuntime.Objects {
 
             IconAppearance appearance = GetAppearance();
             List<uint> overlaysList = GetOverlaysList(appearance);
-            if (overlayIndex > overlaysList.Count)
-                throw new Exception($"Atom only has {overlaysList.Count} {(_isUnderlays ? "underlay" : "overlay")}(s), cannot index {overlayIndex}");
+
+            Guard.IsLessThanOrEqualTo(overlayIndex, overlaysList.Count);
 
             if (_appearanceSystem == null)
                 return DreamValue.Null;
