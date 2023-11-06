@@ -11,11 +11,11 @@ using Dependency = Robust.Shared.IoC.DependencyAttribute;
 
 namespace OpenDreamRuntime {
     public sealed class AtomManager {
-        public List<DreamObjectArea> Areas { get; } = new();
-        public List<DreamObjectTurf> Turfs { get; } = new();
-        public List<DreamObjectMovable> Movables { get; } = new();
-        public List<DreamObjectMovable> Objects { get; } = new();
-        public List<DreamObjectMob> Mobs { get; } = new();
+        public List<WeakReference<DreamObjectArea>> Areas { get; } = new();
+        public List<WeakReference<DreamObjectTurf>> Turfs { get; } = new();
+        public List<WeakReference<DreamObjectMovable>> Movables { get; } = new();
+        public List<WeakReference<DreamObjectMovable>> Objects { get; } = new();
+        public List<WeakReference<DreamObjectMob>> Mobs { get; } = new();
         public int AtomCount => Areas.Count + Turfs.Count + Movables.Count + Objects.Count + Mobs.Count;
 
         [Dependency] private readonly IEntityManager _entityManager = default!;
@@ -30,29 +30,67 @@ namespace OpenDreamRuntime {
         private ServerAppearanceSystem AppearanceSystem => _appearanceSystem ??= _entitySystemManager.GetEntitySystem<ServerAppearanceSystem>();
         private ServerAppearanceSystem? _appearanceSystem;
 
+        public int IndexOfDreamObject<T>(List<WeakReference<T>> list, T dreamObject) where T : DreamObject {
+            for (int i = 0; i < list.Count; i++) {
+                if (list[i].TryGetTarget(out T target) && target.Equals(dreamObject)) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        public void RemoveDreamObject<T>(List<WeakReference<T>> list, T dreamObject) where T : DreamObject
+        {
+            list.RemoveAt(IndexOfDreamObject(list, dreamObject));
+        }
+
+        public void RemoveDreamObject<T>(HashSet<WeakReference<T>> hashSet, T dreamObject) where T : DreamObject
+        {
+            foreach (var weakRef in hashSet) {
+                if (weakRef.TryGetTarget(out T target) && target.Equals(dreamObject)) {
+                    hashSet.Remove(weakRef);
+                    return;
+                }
+            }
+        }
+
+
         public DreamObject GetAtom(int index) {
             // Order of world.contents:
             //  Mobs + Movables + Areas + Turfs
 
-            if (index < Mobs.Count)
-                return Mobs[index];
+            if (index < Mobs.Count) {
+                Mobs[index].TryGetTarget(out var mob);
+                return mob!;
+            }
+
+
 
             // TODO: Movables and objects should be mixed together here
             index -= Mobs.Count;
-            if (index < Objects.Count)
-                return Objects[index];
+            if (index < Objects.Count) {
+                Objects[index].TryGetTarget(out var obj);
+                return obj!;
+            }
 
             index -= Objects.Count;
-            if (index < Movables.Count)
-                return Movables[index];
+            if (index < Movables.Count) {
+                Movables[index].TryGetTarget(out var movable);
+                return movable!;
+            }
 
             index -= Movables.Count;
-            if (index < Areas.Count)
-                return Areas[index];
+            if (index < Areas.Count) {
+                Areas[index].TryGetTarget(out var area);
+                return area!;
+            }
 
             index -= Areas.Count;
-            if (index < Turfs.Count)
-                return Turfs[index];
+            if (index < Turfs.Count) {
+                Turfs[index].TryGetTarget(out var turf);
+                return turf!;
+            }
 
             throw new IndexOutOfRangeException($"Cannot get atom at index {index}. There are only {AtomCount} atoms.");
         }

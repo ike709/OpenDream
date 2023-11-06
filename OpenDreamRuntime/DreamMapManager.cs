@@ -126,8 +126,8 @@ namespace OpenDreamRuntime {
             // Also call New() on all /area not in the grid.
             // This may call New() a SECOND TIME. This is intentional.
             foreach (var thing in _atomManager.Areas) {
-                if (seenAreas.Add(thing)) {
-                    thing.SpawnProc("New");
+                if (thing.TryGetTarget(out var target) && seenAreas.Add(target)) {
+                    target.SpawnProc("New");
                 }
             }
 
@@ -161,7 +161,7 @@ namespace OpenDreamRuntime {
                 cell.Turf = new DreamObjectTurf(type, pos.X, pos.Y, z, cell);
                 // Only add the /turf to .contents when it's created.
                 cell.Area.Contents.AddValue(new(cell.Turf));
-                _atomManager.Turfs.Add(cell.Turf);
+                _atomManager.Turfs.Add(new WeakReference<DreamObjectTurf>(cell.Turf, false));
             }
 
             IconAppearance turfAppearance = _atomManager.GetAppearanceFromDefinition(cell.Turf.ObjectDefinition);

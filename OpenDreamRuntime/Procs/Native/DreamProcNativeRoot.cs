@@ -1658,7 +1658,10 @@ namespace OpenDreamRuntime.Procs.Native {
             if (!depthValue.TryGetValueAsInteger(out var depth))
                 depth = 5; //TODO: Default to world.view
 
-            foreach (DreamObjectMob mob in bundle.AtomManager.Mobs) {
+            foreach (var mobRef in bundle.AtomManager.Mobs) {
+                if (!mobRef.TryGetTarget(out var mob)) {
+                    continue;
+                }
                 if (mob.X == centerPos.X && mob.Y == centerPos.Y) continue;
 
                 if (Math.Abs(centerPos.X - mob.X) <= depth && Math.Abs(centerPos.Y - mob.Y) <= depth) {
@@ -2853,7 +2856,10 @@ namespace OpenDreamRuntime.Procs.Native {
             if (!depthValue.TryGetValueAsInteger(out var depth))
                 depth = 5; //TODO: Default to world.view
 
-            foreach (DreamObjectMob mob in bundle.AtomManager.Mobs) {
+            foreach (var mobRef in bundle.AtomManager.Mobs) {
+                if (!mobRef.TryGetTarget(out var mob)) {
+                    continue;
+                }
                 if (Math.Abs(centerX - mob.X) <= depth && Math.Abs(centerY - mob.Y) <= depth) {
                     view.AddValue(new DreamValue(mob));
                 }

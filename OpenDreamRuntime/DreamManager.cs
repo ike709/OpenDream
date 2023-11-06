@@ -42,12 +42,12 @@ namespace OpenDreamRuntime {
         // Global state that may not really (really really) belong here
         public DreamValue[] Globals { get; set; } = Array.Empty<DreamValue>();
         public List<string> GlobalNames { get; private set; } = new List<string>();
-        public Dictionary<DreamObject, int> ReferenceIDs { get; } = new();
-        public Dictionary<int, DreamObject> ReferenceIDsToDreamObject { get; } = new();
-        public HashSet<DreamObject> Clients { get; set; } = new();
-        public HashSet<DreamObject> Datums { get; set; } = new();
+        public Dictionary<WeakDreamObjectKey, int> ReferenceIDs { get; } = new();
+        public Dictionary<int, WeakReference<DreamObject>> ReferenceIDsToDreamObject { get; } = new();
+        public HashSet<WeakReference<DreamObject>> Clients { get; set; } = new();
+        public HashSet<WeakReference<DreamObject>> Datums { get; set; } = new();
         public Random Random { get; set; } = new();
-        public Dictionary<string, List<DreamObject>> Tags { get; set; } = new();
+        public Dictionary<string, List<WeakReference<DreamObject>>> Tags { get; set; } = new();
         private int _dreamObjectRefIdCounter;
 
         private DreamCompiledJson _compiledJson;
@@ -199,10 +199,11 @@ namespace OpenDreamRuntime {
                             break;
                         }
                     }
-                    if (!ReferenceIDs.TryGetValue(refObject, out idx)) {
+
+                    if (!WeakDreamObjectKey.TryGetValue(ReferenceIDs, refObject, out idx)) {
                         idx = _dreamObjectRefIdCounter++;
-                        ReferenceIDs.Add(refObject, idx);
-                        ReferenceIDsToDreamObject.Add(idx, refObject);
+                        ReferenceIDs.Add(new WeakDreamObjectKey(refObject), idx);
+                        ReferenceIDsToDreamObject.Add(idx, new WeakReference<DreamObject>(refObject, false));
                     }
                 }
             } else if (value.TryGetValueAsString(out var refStr)) {
@@ -261,7 +262,7 @@ namespace OpenDreamRuntime {
                     case RefType.DreamObjectMob:
                     case RefType.DreamObjectTurf:
                     case RefType.DreamObject:
-                        if (ReferenceIDsToDreamObject.TryGetValue(refId, out var dreamObject))
+                        if (ReferenceIDsToDreamObject.TryGetValue(refId, out var dreamObjectRef) && dreamObjectRef.TryGetTarget(out var dreamObject))
                             return new(dreamObject);
 
                         return DreamValue.Null;
@@ -294,7 +295,10 @@ namespace OpenDreamRuntime {
             // Note that surrounding [] are stripped out at this point, this is intentional
             // Doing locate("[abc]") is the same as locate("abc")
             if (Tags.TryGetValue(refString, out var tagList)) {
-                return new DreamValue(tagList.First());
+                var listRef = tagList.First();
+                if (listRef.TryGetTarget(out var tag)) {
+                    return new DreamValue(tag);
+                }
             }
 
             // Nothing found
@@ -322,5 +326,68 @@ namespace OpenDreamRuntime {
         DreamResource = 0x27000000, //Equivalent to file
         DreamAppearance = 0x3A000000,
         Proc = 0x26000000
+    }
+
+    public struct WeakDreamObjectKey : IEquatable<WeakDreamObjectKey>
+    {
+        private readonly WeakReference<DreamObject> _weakRef;
+        private readonly int _hashCode;  // Cache the hash code to ensure it remains stable
+
+        public WeakDreamObjectKey(DreamObject dreamObject)
+        {
+            _weakRef = new WeakReference<DreamObject>(dreamObject);
+            _hashCode = dreamObject.GetHashCode();
+        }
+
+        public bool TryGetTarget(out DreamObject target)
+        {
+            return _weakRef.TryGetTarget(out target);
+        }
+
+        public static bool TryGetValue(Dictionary<WeakDreamObjectKey, int> dictionary, DreamObject dreamObject, out int value)
+        {
+            foreach (var key in dictionary.Keys)
+            {
+                if (key.TryGetTarget(out DreamObject target) && ReferenceEquals(target, dreamObject))
+                {
+                    return dictionary.TryGetValue(key, out value);
+                }
+            }
+
+            value = default;
+            return false;
+        }
+
+        public bool Equals(WeakDreamObjectKey other)
+        {
+            if (_hashCode != other._hashCode) return false;
+
+            if (TryGetTarget(out DreamObject thisTarget) && other.TryGetTarget(out DreamObject otherTarget))
+            {
+                return ReferenceEquals(thisTarget, otherTarget);
+            }
+
+            return false;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is WeakDreamObjectKey other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return _hashCode;
+        }
+
+        public static bool operator ==(WeakDreamObjectKey left, WeakDreamObjectKey right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(WeakDreamObjectKey left, WeakDreamObjectKey right)
+        {
+            return !left.Equals(right);
+        }
     }
 }

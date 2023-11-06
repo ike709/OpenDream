@@ -8,7 +8,7 @@ namespace OpenDreamRuntime.Objects.Types;
 public sealed class DreamObjectSavefile : DreamObject {
     public sealed class SavefileDirectory : Dictionary<string, DreamValue> { }
 
-    public static readonly List<DreamObjectSavefile> Savefiles = new();
+    public static readonly List<WeakReference<DreamObjectSavefile>> Savefiles = new();
 
     public override bool ShouldCallNew => false;
 
@@ -39,11 +39,11 @@ public sealed class DreamObjectSavefile : DreamObject {
             };
         }
 
-        Savefiles.Add(this);
+        Savefiles.Add(new WeakReference<DreamObjectSavefile>(this, false));
     }
 
     protected override void HandleDeletion() {
-        Savefiles.Remove(this);
+        AtomManager.RemoveDreamObject(Savefiles, this);
 
         base.HandleDeletion();
     }

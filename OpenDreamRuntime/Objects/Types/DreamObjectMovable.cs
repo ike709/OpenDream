@@ -47,11 +47,11 @@ public class DreamObjectMovable : DreamObjectAtom {
         ScreenLoc = screenLoc;
 
         if (IsSubtypeOf(ObjectTree.Obj))
-            AtomManager.Objects.Add(this);
+            AtomManager.Objects.Add(new WeakReference<DreamObjectMovable>(this));
         else if (IsSubtypeOf(ObjectTree.Mob))
-            AtomManager.Mobs.Add((DreamObjectMob)this);
+            AtomManager.Mobs.Add(new WeakReference<DreamObjectMob>((DreamObjectMob)this, false));
         else
-            AtomManager.Movables.Add(this);
+            AtomManager.Movables.Add(new WeakReference<DreamObjectMovable>(this, false));
     }
 
     public override void Initialize(DreamProcArguments args) {
@@ -63,11 +63,11 @@ public class DreamObjectMovable : DreamObjectAtom {
 
     protected override void HandleDeletion() {
         if (IsSubtypeOf(ObjectTree.Obj))
-            AtomManager.Objects.RemoveSwap(AtomManager.Objects.IndexOf(this));
+            AtomManager.Objects.RemoveSwap(AtomManager.IndexOfDreamObject(AtomManager.Objects, this));
         else if (IsSubtypeOf(ObjectTree.Mob))
-            AtomManager.Mobs.RemoveSwap(AtomManager.Mobs.IndexOf((DreamObjectMob)this));
+            AtomManager.Mobs.RemoveSwap(AtomManager.IndexOfDreamObject(AtomManager.Mobs, (DreamObjectMob)this));
         else
-            AtomManager.Movables.RemoveSwap(AtomManager.Movables.IndexOf(this));
+            AtomManager.Movables.RemoveSwap(AtomManager.IndexOfDreamObject(AtomManager.Movables, this));
 
         AtomManager.DeleteMovableEntity(this);
         base.HandleDeletion();

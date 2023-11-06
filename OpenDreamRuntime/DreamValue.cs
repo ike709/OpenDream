@@ -91,6 +91,36 @@ namespace OpenDreamRuntime {
             _refValue = value;
         }
 
+        public DreamValue(WeakReference<DreamObject>? value)
+        {
+            Type = DreamValueType.DreamObject;
+            _refValue = (value is not null && value.TryGetTarget(out var objRef)) ? objRef : null;
+        }
+
+        public DreamValue(WeakReference<DreamObjectMovable>? value)
+        {
+            Type = DreamValueType.DreamObject;
+            _refValue = (value is not null && value.TryGetTarget(out var objRef)) ? objRef : null;
+        }
+
+        public DreamValue(WeakReference<DreamObjectArea>? value)
+        {
+            Type = DreamValueType.DreamObject;
+            _refValue = (value is not null && value.TryGetTarget(out var objRef)) ? objRef : null;
+        }
+
+        public DreamValue(WeakReference<DreamObjectTurf>? value)
+        {
+            Type = DreamValueType.DreamObject;
+            _refValue = (value is not null && value.TryGetTarget(out var objRef)) ? objRef : null;
+        }
+
+        public DreamValue(WeakReference<DreamObjectMob>? value)
+        {
+            Type = DreamValueType.DreamObject;
+            _refValue = (value is not null && value.TryGetTarget(out var objRef)) ? objRef : null;
+        }
+
         public DreamValue(TreeEntry value) {
             Type = DreamValueType.DreamType;
             _refValue = value;

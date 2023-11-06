@@ -19,14 +19,15 @@ public sealed class DreamObjectClient : DreamObject {
         Verbs = new(ObjectTree, this);
         Images = new(ObjectTree, clientImagesSystem, Connection);
 
-        DreamManager.Clients.Add(this);
+        DreamManager.Clients.Add(new WeakReference<DreamObject>(this, false));
 
         View = DreamManager.WorldInstance.DefaultView;
     }
 
     protected override void HandleDeletion() {
         Connection.Session?.ConnectedClient.Disconnect("Your client object was deleted");
-        DreamManager.Clients.Remove(this);
+        var atomManager = IoCManager.Resolve<AtomManager>();
+        atomManager.RemoveDreamObject(DreamManager.Clients, this);
 
         base.HandleDeletion();
     }

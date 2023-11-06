@@ -34,11 +34,11 @@ namespace OpenDreamRuntime.Procs {
     /// <summary>
     /// Enumerates over an IEnumerable of DreamObjects, possibly filtering for a certain type
     /// </summary>
-    sealed class DreamObjectEnumerator : IDreamValueEnumerator {
-        private readonly IEnumerator<DreamObject> _dreamObjectEnumerator;
+    sealed class DreamObjectEnumerator<T> : IDreamValueEnumerator where T : DreamObject {
+        private readonly IEnumerator<WeakReference<T>> _dreamObjectEnumerator;
         private readonly TreeEntry? _filterType;
 
-        public DreamObjectEnumerator(IEnumerable<DreamObject> dreamObjects, TreeEntry? filterType = null) {
+        public DreamObjectEnumerator(IEnumerable<WeakReference<T>> dreamObjects, TreeEntry? filterType = null) {
             _dreamObjectEnumerator = dreamObjects.GetEnumerator();
             _filterType = filterType;
         }
@@ -46,14 +46,16 @@ namespace OpenDreamRuntime.Procs {
         public bool Enumerate(DMProcState state, DreamReference? reference) {
             bool success = _dreamObjectEnumerator.MoveNext();
             if (_filterType != null) {
-                while (success && !_dreamObjectEnumerator.Current.IsSubtypeOf(_filterType)) {
+                while (success && _dreamObjectEnumerator.Current.TryGetTarget(out var currentObj) && (currentObj is null || !currentObj.IsSubtypeOf(_filterType))) {
                     success = _dreamObjectEnumerator.MoveNext();
                 }
             }
 
             // Assign regardless of success
-            if (reference != null)
-                state.AssignReference(reference.Value, new DreamValue(_dreamObjectEnumerator.Current));
+            if (reference != null) {
+                _dreamObjectEnumerator.Current.TryGetTarget(out var currentObj);
+                state.AssignReference(reference.Value, new DreamValue(currentObj));
+            }
             return success;
         }
     }

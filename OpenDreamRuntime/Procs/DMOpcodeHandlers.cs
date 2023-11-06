@@ -88,13 +88,13 @@ namespace OpenDreamRuntime.Procs {
                     } else if (dreamObject is DreamObjectWorld) {
                         // Use a different enumerator for /area and /turf that only enumerates those rather than all atoms
                         if (filterType?.ObjectDefinition.IsSubtypeOf(objectTree.Area) == true) {
-                            return new DreamObjectEnumerator(atomManager.Areas, filterType);
+                            return new DreamObjectEnumerator<DreamObjectArea>(atomManager.Areas, filterType);
                         } else if (filterType?.ObjectDefinition.IsSubtypeOf(objectTree.Turf) == true) {
-                            return new DreamObjectEnumerator(atomManager.Turfs, filterType);
+                            return new DreamObjectEnumerator<DreamObjectTurf>(atomManager.Turfs, filterType);
                         } else if (filterType?.ObjectDefinition.IsSubtypeOf(objectTree.Obj) == true) {
-                            return new DreamObjectEnumerator(atomManager.Objects, filterType);
+                            return new DreamObjectEnumerator<DreamObjectMovable>(atomManager.Objects, filterType);
                         } else if (filterType?.ObjectDefinition.IsSubtypeOf(objectTree.Mob) == true) {
-                            return new DreamObjectEnumerator(atomManager.Mobs, filterType);
+                            return new DreamObjectEnumerator<DreamObjectMob>(atomManager.Mobs, filterType);
                         }
 
                         return new WorldContentsEnumerator(atomManager, filterType);
@@ -140,7 +140,7 @@ namespace OpenDreamRuntime.Procs {
             }
 
             if (type == state.Proc.ObjectTree.Client) {
-                state.EnumeratorStack.Push(new DreamObjectEnumerator(state.DreamManager.Clients));
+                state.EnumeratorStack.Push(new DreamObjectEnumerator<DreamObject>(state.DreamManager.Clients));
                 return ProcStatus.Continue;
             }
 
@@ -150,7 +150,7 @@ namespace OpenDreamRuntime.Procs {
             }
 
             if (type.ObjectDefinition.IsSubtypeOf(state.Proc.ObjectTree.Datum)) {
-                state.EnumeratorStack.Push(new DreamObjectEnumerator(state.DreamManager.Datums, type));
+                state.EnumeratorStack.Push(new DreamObjectEnumerator<DreamObject>(state.DreamManager.Datums, type));
                 return ProcStatus.Continue;
             }
 

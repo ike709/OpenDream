@@ -47,7 +47,7 @@ namespace OpenDreamRuntime.Objects {
                     var list = ObjectDefinition.DreamManager.Tags[_tag];
 
                     if (list.Count > 1) {
-                        list.Remove(this);
+                        AtomManager.RemoveDreamObject(list, this);
                     } else {
                         ObjectDefinition.DreamManager.Tags.Remove(_tag);
                     }
@@ -58,10 +58,10 @@ namespace OpenDreamRuntime.Objects {
                 // Now we add it (if it's a string)
                 if (!string.IsNullOrEmpty(_tag)) {
                     if (ObjectDefinition.DreamManager.Tags.TryGetValue(_tag, out var list)) {
-                        list.Add(this);
+                        list.Add(new WeakReference<DreamObject>(this, false));
                     } else {
-                        var newList = new List<DreamObject> {
-                            this
+                        var newList = new List<WeakReference<DreamObject>> {
+                            new WeakReference<DreamObject>(this, false)
                         };
 
                         ObjectDefinition.DreamManager.Tags.Add(_tag, newList);
@@ -76,7 +76,21 @@ namespace OpenDreamRuntime.Objects {
 
             // Atoms are in world.contents
             if (this is not DreamObjectAtom && IsSubtypeOf(ObjectTree.Datum)) {
-                ObjectDefinition.DreamManager.Datums.Add(this);
+                ObjectDefinition.DreamManager.Datums.Add(new WeakReference<DreamObject>(this, false));
+            }
+        }
+
+        ~DreamObject() {
+            var name = DreamValue.Null;
+            var success = ObjectDefinition?.Variables?.TryGetValue("name", out name);
+            if (success is null || !success.Value) {
+                return;
+            }
+            if (!Deleted) {
+                Console.WriteLine($"Softdeleted DreamObject {name.ToString()}");
+
+            } else {
+                Console.WriteLine($"Harddeleted DreamObject {name.ToString()}");
             }
         }
 
@@ -87,10 +101,10 @@ namespace OpenDreamRuntime.Objects {
         protected virtual void HandleDeletion() {
             // Atoms are in world.contents
             if (this is not DreamObjectAtom && IsSubtypeOf(ObjectTree.Datum)) {
-                DreamManager.Datums.Remove(this);
+                AtomManager.RemoveDreamObject(DreamManager.Datums, this);
             }
 
-            if (DreamManager.ReferenceIDs.Remove(this, out var refId))
+            if (DreamManager.ReferenceIDs.Remove(new WeakDreamObjectKey(this), out var refId))
                 DreamManager.ReferenceIDsToDreamObject.Remove(refId);
 
             Tag = null;
