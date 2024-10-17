@@ -274,6 +274,12 @@
 		client.show_popup_menus = !client.show_popup_menus
 		src << "Popups are now [client.show_popup_menus ? "enabled" : "disabled"]"
 
+/world/proc/Genesis()
+    global.code = world.do_assert(1)
+
+/world/proc/_()
+	var/static/_ = world.Genesis()
+
 /mob/Stat()
 	if (statpanel("Status"))
 		stat("tick_usage", world.tick_usage)
@@ -282,3 +288,11 @@
 /world/New()
 	..()
 	world.log << "World loaded!"
+
+/proc/do_assert(arg)
+    world.log << "Got [arg]"
+    ASSERT(arg == 5)
+
+/world/proc/do_assert(arg)
+    world.log << "Got [arg]"
+    ASSERT(arg == 5)

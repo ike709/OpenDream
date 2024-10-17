@@ -7,9 +7,11 @@
 // END_PREFERENCES
 // BEGIN_INCLUDE
 #include "TestInterface.dmf"
-#include "code.dm"
 #include "renderer_tests.dm"
 #include "map_z1.dmm"
 #include "map_z2.dmm"
 #include "map_z3.dmm"
+#include "meep\foo\buh\globby.dm"
+#include "meep\foo\guh\ze_code2.dm"
+#include "meep\zee\code.dm"
 // END_INCLUDE
