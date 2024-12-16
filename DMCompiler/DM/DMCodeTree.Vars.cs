@@ -262,6 +262,8 @@ internal partial class DMCodeTree {
             DMExpression? value = null;
             if (varDecl.Value != null) {
                 var scope = IsFirstPass ? ScopeMode.FirstPassStatic : ScopeMode.Static;
+                scope = pass == 2 ? ScopeMode.Normal : scope; // Late pass
+
                 if (!TryBuildValue(new(compiler, dmObject, proc), varDecl.Value, varDecl.Type, scope, out value))
                     return false;
             }

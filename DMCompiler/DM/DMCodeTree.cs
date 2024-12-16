@@ -103,6 +103,9 @@ internal partial class DMCodeTree {
 
                 if (successful)
                     _waitingNodes.Remove(node);
+                else {
+                    Console.WriteLine("g");
+                }
             }
         }
 
@@ -125,18 +128,23 @@ internal partial class DMCodeTree {
         Pass(_root);
         Pass(_dmStandardRoot!);
 
-        // If there exists vars that didn't successfully compile, emit their errors
-        foreach (var node in _waitingNodes) {
-            if (node is not VarNode varNode) // TODO: If a type or proc fails?
-                continue;
-            if (varNode.LastError == null)
-                continue;
-
-            _compiler.Emit(WarningCode.ItemDoesntExist, varNode.LastError.Location,
-                varNode.LastError.Message);
-        }
-
         _compiler.GlobalInitProc.ResolveLabels();
+    }
+
+    public void FinalPass() {
+        // If there exists vars that didn't successfully compile then try one final time, otherwise emit their errors
+        foreach (var node in _waitingNodes) {
+            if (node is not VarNode varNode) continue; // TODO: If a type or proc fails?
+            var successful = varNode.TryDefineVar(_compiler, _currentPass);
+
+            if (!successful) {
+                if (varNode.LastError == null)
+                    continue;
+
+                _compiler.Emit(WarningCode.ItemDoesntExist, varNode.LastError.Location,
+                    varNode.LastError.Message);
+            }
+        }
     }
 
     public void FinishDMStandard() {

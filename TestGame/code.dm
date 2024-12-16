@@ -1,3 +1,16 @@
+#define NAMEOF(datum, X) (#X || ##datum.##X)
+
+/obj/effect/mob_spawn/ghost_role
+    var/you_are_text = ""
+    var/flavour_text = ""
+
+/datum/unit_test/mob_spawn/proc/Run()
+    var/obj/effect/mob_spawn/ghost_role/ghost_role
+
+    var/static/list/required_vars = list(
+        ghost_role.flavour_text = "Spawners menu uses it.",
+        )
+
 #ifndef OPENDREAM
 /world/proc/ODHotReloadInterface()
 	world.log << "OpenDream-specific procs don't exist in BYOND."

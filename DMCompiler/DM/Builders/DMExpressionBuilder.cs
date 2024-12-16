@@ -581,6 +581,9 @@ internal class DMExpressionBuilder(ExpressionContext ctx, DMExpressionBuilder.Sc
             case "global":
                 return new Global(identifier.Location);
             default: {
+                if (name == "ghost_role") {
+                    Console.WriteLine("p");
+                }
                 if (scopeMode == Normal) {
                     var localVar = ctx.Proc?.GetLocalVariable(name);
                     if (localVar != null)

@@ -25,6 +25,8 @@ internal class DMCodeTreeBuilder(DMCompiler compiler) {
         // Compile every proc
         foreach (DMProc proc in compiler.DMObjectTree.AllProcs)
             proc.Compile();
+
+        CodeTree.FinalPass();
     }
 
     private void ProcessBlockInner(DMASTBlockInner blockInner, DreamPath currentType) {
